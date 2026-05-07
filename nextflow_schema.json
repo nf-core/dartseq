@@ -2,7 +2,7 @@
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://raw.githubusercontent.com/nf-core/dartseq/master/nextflow_schema.json",
     "title": "nf-core/dartseq pipeline parameters",
-    "description": "DART-seq (Deamination Adjacent to RNA modification Targets) is a technique that detects m6A (N6-methyladenosine) methylation sites across the entire transcriptome at single-nucleotide resolution. The method uses a APOBEC1-YTH fusion protein that, binds to m6A methylation sites (via YTH domain), catalyzes C→U editing nearby (via APOBEC1 domain), and creates detectable "footprints" of where m6A was located.",
+    "description": "Pipeline for m6A detection in RNAseq data",
     "type": "object",
     "$defs": {
         "input_output_options": {
