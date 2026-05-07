@@ -1,0 +1,22 @@
+repository_type: pipeline
+
+nf_core_version: 3.5.2
+
+lint: {}
+
+template:
+  org: nf-core
+  name: dartseq
+  description: "DART-seq (Deamination Adjacent to RNA modification Targets) is a technique\
+    \ that detects m6A (N6-methyladenosine) methylation sites across the entire transcriptome\
+    \ at single-nucleotide resolution. The method uses a APOBEC1-YTH fusion protein\
+    \ that, binds to m6A methylation sites (via YTH domain), catalyzes C\u2192U editing\
+    \ nearby (via APOBEC1 domain), and creates detectable \"footprints\" of where\
+    \ m6A was located."
+  author: Mathieu Flamand, Olga Brovkina, Joana Pimenta Bernardes, Fatemeh Nasehi
+  version: 1.0.0dev
+  force: true
+  outdir: .
+  skip_features:
+    - gpu
+  is_nfcore: true
