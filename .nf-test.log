@@ -1,0 +1,22 @@
+May-13 13:22:56.431 [main] INFO  com.askimed.nf.test.App - nf-test 0.9.3
+May-13 13:22:56.444 [main] INFO  com.askimed.nf.test.App - Arguments: [test, tests/bullseye.nf.test, tests/bullseye_postprocess.nf.test, --profile, test,singularity]
+May-13 13:22:57.211 [main] INFO  com.askimed.nf.test.App - Nextflow Version: 25.10.0
+May-13 13:22:57.213 [main] INFO  com.askimed.nf.test.commands.RunTestsCommand - Load config from file /work_ikmb/sukmb662/nf-core-dartseq/nf-test.config...
+May-13 13:22:59.059 [main] INFO  com.askimed.nf.test.lang.dependencies.DependencyResolver - Loaded 36 files from directory /work_ikmb/sukmb662/nf-core-dartseq in 1.423 sec
+May-13 13:22:59.061 [main] INFO  com.askimed.nf.test.lang.dependencies.DependencyResolver - Found 2 files containing tests.
+May-13 13:22:59.061 [main] DEBUG com.askimed.nf.test.lang.dependencies.DependencyResolver - Found files: [/work_ikmb/sukmb662/nf-core-dartseq/tests/bullseye.nf.test, /work_ikmb/sukmb662/nf-core-dartseq/tests/bullseye_postprocess.nf.test]
+May-13 13:22:59.333 [main] INFO  com.askimed.nf.test.commands.RunTestsCommand - Found 2 tests to execute.
+May-13 13:22:59.334 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Started test plan
+May-13 13:22:59.334 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Running testsuite 'Bullseye test' from file '/work_ikmb/sukmb662/nf-core-dartseq/tests/bullseye.nf.test'.
+May-13 13:22:59.334 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Run test '69525453: Bullseye on STAR alignment output'. type: com.askimed.nf.test.lang.pipeline.PipelineTest
+May-13 13:24:36.223 [main] DEBUG com.askimed.nf.test.lang.extensions.SnapshotFile - Load snapshots from file '/work_ikmb/sukmb662/nf-core-dartseq/tests/bullseye.nf.test.snap'
+May-13 13:24:36.552 [main] DEBUG com.askimed.nf.test.lang.extensions.Snapshot - Snapshots 'Bullseye on STAR alignment output' match.
+May-13 13:24:36.552 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Test '69525453: Bullseye on STAR alignment output' finished. status: PASSED
+May-13 13:24:36.554 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Testsuite 'Bullseye test' finished. snapshot file: true, skipped tests: false, failed tests: false
+May-13 13:24:36.555 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Running testsuite 'Bullseye postprocess test' from file '/work_ikmb/sukmb662/nf-core-dartseq/tests/bullseye_postprocess.nf.test'.
+May-13 13:24:36.555 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Run test 'bf3412bc: Bullseye with RAC filter and gather sites'. type: com.askimed.nf.test.lang.pipeline.PipelineTest
+May-13 13:26:12.697 [main] DEBUG com.askimed.nf.test.lang.extensions.SnapshotFile - Load snapshots from file '/work_ikmb/sukmb662/nf-core-dartseq/tests/bullseye_postprocess.nf.test.snap'
+May-13 13:26:13.117 [main] DEBUG com.askimed.nf.test.lang.extensions.Snapshot - Snapshots 'Bullseye with RAC filter and gather sites' match.
+May-13 13:26:13.117 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Test 'bf3412bc: Bullseye with RAC filter and gather sites' finished. status: PASSED
+May-13 13:26:13.118 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Testsuite 'Bullseye postprocess test' finished. snapshot file: true, skipped tests: false, failed tests: false
+May-13 13:26:13.118 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Executed 2 tests. 0 tests failed. Done!

@@ -1,0 +1,5 @@
+Sample	total_reads	paired_total	paired_aligned_none	paired_aligned_one	paired_aligned_multi	overall_alignment_rate	paired_aligned_mate_none_halved
+A03	24785	24785	24775	8	2	0.04	24775
+A04	24828	24828	24820	7	1	0.03	24820
+C03	24793	24793	24777	16	0	0.06	24777
+E01	24714	24714	24702	11	1	0.05	24702

@@ -1,0 +1,13 @@
+Module	Section	Sample Name	Source
+fastp	all_sections	A03	/work_ikmb/sukmb662/nf-core-dartseq/.nf-test/tests/c803e960ecee058a945c0e5be8f1e384/work/01/d4f874417cc618e221aa7d80141462/8/A03.fastp.json
+fastp	all_sections	A04	/work_ikmb/sukmb662/nf-core-dartseq/.nf-test/tests/c803e960ecee058a945c0e5be8f1e384/work/01/d4f874417cc618e221aa7d80141462/10/A04.fastp.json
+fastp	all_sections	C03	/work_ikmb/sukmb662/nf-core-dartseq/.nf-test/tests/c803e960ecee058a945c0e5be8f1e384/work/01/d4f874417cc618e221aa7d80141462/9/C03.fastp.json
+fastp	all_sections	E01	/work_ikmb/sukmb662/nf-core-dartseq/.nf-test/tests/c803e960ecee058a945c0e5be8f1e384/work/01/d4f874417cc618e221aa7d80141462/7/E01.fastp.json
+FastQC	all_sections	A03_1	/work_ikmb/sukmb662/nf-core-dartseq/.nf-test/tests/c803e960ecee058a945c0e5be8f1e384/work/01/d4f874417cc618e221aa7d80141462/16/A03_1_fastqc.zip
+FastQC	all_sections	A03_2	/work_ikmb/sukmb662/nf-core-dartseq/.nf-test/tests/c803e960ecee058a945c0e5be8f1e384/work/01/d4f874417cc618e221aa7d80141462/17/A03_2_fastqc.zip
+FastQC	all_sections	A04_1	/work_ikmb/sukmb662/nf-core-dartseq/.nf-test/tests/c803e960ecee058a945c0e5be8f1e384/work/01/d4f874417cc618e221aa7d80141462/22/A04_1_fastqc.zip
+FastQC	all_sections	A04_2	/work_ikmb/sukmb662/nf-core-dartseq/.nf-test/tests/c803e960ecee058a945c0e5be8f1e384/work/01/d4f874417cc618e221aa7d80141462/23/A04_2_fastqc.zip
+FastQC	all_sections	C03_1	/work_ikmb/sukmb662/nf-core-dartseq/.nf-test/tests/c803e960ecee058a945c0e5be8f1e384/work/01/d4f874417cc618e221aa7d80141462/18/C03_1_fastqc.zip
+FastQC	all_sections	C03_2	/work_ikmb/sukmb662/nf-core-dartseq/.nf-test/tests/c803e960ecee058a945c0e5be8f1e384/work/01/d4f874417cc618e221aa7d80141462/19/C03_2_fastqc.zip
+FastQC	all_sections	E01_1	/work_ikmb/sukmb662/nf-core-dartseq/.nf-test/tests/c803e960ecee058a945c0e5be8f1e384/work/01/d4f874417cc618e221aa7d80141462/20/E01_1_fastqc.zip
+FastQC	all_sections	E01_2	/work_ikmb/sukmb662/nf-core-dartseq/.nf-test/tests/c803e960ecee058a945c0e5be8f1e384/work/01/d4f874417cc618e221aa7d80141462/21/E01_2_fastqc.zip

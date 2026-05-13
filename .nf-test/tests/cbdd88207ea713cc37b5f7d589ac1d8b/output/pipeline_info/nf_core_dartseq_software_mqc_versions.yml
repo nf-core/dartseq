@@ -1,0 +1,20 @@
+FASTP:
+  fastp: 1.1.0
+FASTQC:
+  fastqc: 0.12.1
+HISAT2_ALIGN:
+  hisat2: 2.2.2
+  samtools: 1.23
+HISAT2_BUILD:
+  hisat2: 2.2.2
+HISAT2_EXTRACTSPLICESITES:
+  hisat2: 2.2.1
+RUSTQC:
+  rustqc: mock
+SAMTOOLS_INDEX:
+  samtools: 1.23.1
+SAMTOOLS_SORT:
+  samtools: 1.23.1
+Workflow:
+    nf-core/dartseq: v1.0.0dev
+    Nextflow: 25.10.0

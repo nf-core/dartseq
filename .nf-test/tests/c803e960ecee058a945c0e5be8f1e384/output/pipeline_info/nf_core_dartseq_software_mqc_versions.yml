@@ -1,0 +1,7 @@
+FASTP:
+  fastp: 1.1.0
+FASTQC:
+  fastqc: 0.12.1
+Workflow:
+    nf-core/dartseq: v1.0.0dev
+    Nextflow: 25.10.0

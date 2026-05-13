@@ -1,0 +1,52 @@
+Detecting adapter sequence for read1...
+CACACACACA
+
+Detecting adapter sequence for read2...
+TGTGTGTGTG
+
+Read1 before filtering:
+total reads: 25000
+total bases: 1261771
+Q20 bases: 1249465(99.0247%)
+Q30 bases: 1214206(96.2303%)
+Q40 bases: 1214206(96.2303%)
+
+Read2 before filtering:
+total reads: 25000
+total bases: 1262003
+Q20 bases: 1248031(98.8929%)
+Q30 bases: 1214072(96.202%)
+Q40 bases: 1214072(96.202%)
+
+Read1 after filtering:
+total reads: 24793
+total bases: 1249883
+Q20 bases: 1238340(99.0765%)
+Q30 bases: 1204359(96.3577%)
+Q40 bases: 1204359(96.3577%)
+
+Read2 after filtering:
+total reads: 24793
+total bases: 1250241
+Q20 bases: 1238526(99.063%)
+Q30 bases: 1206986(96.5403%)
+Q40 bases: 1206986(96.5403%)
+
+Filtering result:
+reads passed filter: 49586
+reads failed due to low quality: 134
+reads failed due to too many N: 14
+reads failed due to too short: 266
+reads failed due to adapter dimer: 0
+reads with adapter trimmed: 292
+bases trimmed due to adapters: 5261
+
+Duplication rate: 0.14%
+
+Insert size peak (evaluated by paired-end reads): 0
+
+JSON report: C03.fastp.json
+HTML report: C03.fastp.html
+
+fastp --in1 C03_R1.fastq.gz --in2 C03_R2.fastq.gz --out1 C03_R1.fastp.fastq.gz --out2 C03_R2.fastp.fastq.gz --json C03.fastp.json --html C03.fastp.html --thread 4 --detect_adapter_for_pe 
+fastp v1.1.0, time used: 2 seconds

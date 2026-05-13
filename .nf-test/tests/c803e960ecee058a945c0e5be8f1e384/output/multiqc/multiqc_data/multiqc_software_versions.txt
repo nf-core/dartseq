@@ -1,0 +1,4 @@
+Sample	fastp	fastqc	nf-core/dartseq	Nextflow
+FastQC		0.12.1		
+Workflow			v1.0.0dev	25.10.0
+fastp	1.1.0			

@@ -1,0 +1,5 @@
+Sample	PE mapped uniquely	PE multimapped	PE neither mate aligned
+A03	8.0	2.0	24775.0
+A04	7.0	1.0	24820.0
+C03	16.0	0.0	24777.0
+E01	11.0	1.0	24702.0

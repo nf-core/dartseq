@@ -1,0 +1,1 @@
+{"input":"/work_ikmb/sukmb662/nf-core-dartseq/assets/samplesheet_4samples_local.csv","run_bullseye":false,"run_rustqc":false,"genome":"R64-1-1","skip_alignment":true,"aligner":"star","trimmer":"fastp","outdir":"/work_ikmb/sukmb662/nf-core-dartseq/.nf-test/tests/c803e960ecee058a945c0e5be8f1e384/output"}

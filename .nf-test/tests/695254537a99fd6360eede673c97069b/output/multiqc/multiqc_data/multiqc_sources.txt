@@ -1,0 +1,17 @@
+Module	Section	Sample Name	Source
+STAR	SummaryLog	A03	/work_ikmb/sukmb662/nf-core-dartseq/.nf-test/tests/695254537a99fd6360eede673c97069b/work/37/eb404246ce333d410d70e89c3d64b9/24/A03.Log.final.out
+STAR	SummaryLog	A04	/work_ikmb/sukmb662/nf-core-dartseq/.nf-test/tests/695254537a99fd6360eede673c97069b/work/37/eb404246ce333d410d70e89c3d64b9/25/A04.Log.final.out
+STAR	SummaryLog	C03	/work_ikmb/sukmb662/nf-core-dartseq/.nf-test/tests/695254537a99fd6360eede673c97069b/work/37/eb404246ce333d410d70e89c3d64b9/26/C03.Log.final.out
+STAR	SummaryLog	E01	/work_ikmb/sukmb662/nf-core-dartseq/.nf-test/tests/695254537a99fd6360eede673c97069b/work/37/eb404246ce333d410d70e89c3d64b9/23/E01.Log.final.out
+fastp	all_sections	A03	/work_ikmb/sukmb662/nf-core-dartseq/.nf-test/tests/695254537a99fd6360eede673c97069b/work/37/eb404246ce333d410d70e89c3d64b9/3/A03.fastp.json
+fastp	all_sections	A04	/work_ikmb/sukmb662/nf-core-dartseq/.nf-test/tests/695254537a99fd6360eede673c97069b/work/37/eb404246ce333d410d70e89c3d64b9/6/A04.fastp.json
+fastp	all_sections	C03	/work_ikmb/sukmb662/nf-core-dartseq/.nf-test/tests/695254537a99fd6360eede673c97069b/work/37/eb404246ce333d410d70e89c3d64b9/5/C03.fastp.json
+fastp	all_sections	E01	/work_ikmb/sukmb662/nf-core-dartseq/.nf-test/tests/695254537a99fd6360eede673c97069b/work/37/eb404246ce333d410d70e89c3d64b9/4/E01.fastp.json
+FastQC	all_sections	A03_1	/work_ikmb/sukmb662/nf-core-dartseq/.nf-test/tests/695254537a99fd6360eede673c97069b/work/37/eb404246ce333d410d70e89c3d64b9/19/A03_1_fastqc.zip
+FastQC	all_sections	A03_2	/work_ikmb/sukmb662/nf-core-dartseq/.nf-test/tests/695254537a99fd6360eede673c97069b/work/37/eb404246ce333d410d70e89c3d64b9/20/A03_2_fastqc.zip
+FastQC	all_sections	A04_1	/work_ikmb/sukmb662/nf-core-dartseq/.nf-test/tests/695254537a99fd6360eede673c97069b/work/37/eb404246ce333d410d70e89c3d64b9/17/A04_1_fastqc.zip
+FastQC	all_sections	A04_2	/work_ikmb/sukmb662/nf-core-dartseq/.nf-test/tests/695254537a99fd6360eede673c97069b/work/37/eb404246ce333d410d70e89c3d64b9/18/A04_2_fastqc.zip
+FastQC	all_sections	C03_1	/work_ikmb/sukmb662/nf-core-dartseq/.nf-test/tests/695254537a99fd6360eede673c97069b/work/37/eb404246ce333d410d70e89c3d64b9/21/C03_1_fastqc.zip
+FastQC	all_sections	C03_2	/work_ikmb/sukmb662/nf-core-dartseq/.nf-test/tests/695254537a99fd6360eede673c97069b/work/37/eb404246ce333d410d70e89c3d64b9/22/C03_2_fastqc.zip
+FastQC	all_sections	E01_1	/work_ikmb/sukmb662/nf-core-dartseq/.nf-test/tests/695254537a99fd6360eede673c97069b/work/37/eb404246ce333d410d70e89c3d64b9/15/E01_1_fastqc.zip
+FastQC	all_sections	E01_2	/work_ikmb/sukmb662/nf-core-dartseq/.nf-test/tests/695254537a99fd6360eede673c97069b/work/37/eb404246ce333d410d70e89c3d64b9/16/E01_2_fastqc.zip
