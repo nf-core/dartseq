@@ -1,0 +1,52 @@
+nextflow_pipeline {
+
+    name "HISAT2 alignment test"
+    script "../main.nf"
+    tag "pipeline_hisat2"
+
+    test("HISAT2 alignment with RustQC") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+                input = "$projectDir/assets/samplesheet_4samples_local.csv"
+
+                trimmer        = 'fastp'
+                aligner        = 'hisat2'
+                skip_alignment = false
+                run_bullseye   = false
+
+                // RustQC has no standard container image; mock verifies pipeline wiring.
+                // Replace rustqc_mock with rustqc_cmd pointing to a real binary when available.
+                run_rustqc  = true
+                rustqc_mock = true
+                rustqc_cmd  = null
+
+                hisat2_index      = null
+                hisat2_splicesites = null
+                fasta             = "$projectDir/../test-datasets/data/dartseq/reference/genome.fa"
+                gtf               = "$projectDir/../test-datasets/data/dartseq/reference/genes.gtf"
+            }
+        }
+
+        then {
+            // stable_name: All files + folders in ${params.outdir}/ with a stable name
+            def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignore: ['pipeline_info/*.{html,json,txt}'])
+            // stable_path: All files in ${params.outdir}/ with stable content
+            def stable_path = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
+            assertAll(
+                { assert workflow.success },
+                { assert snapshot(
+                    // Number of successful tasks
+                    workflow.trace.succeeded().size(),
+                    // pipeline versions.yml file for multiqc from which Nextflow version is removed because we test pipelines on multiple Nextflow versions
+                    removeNextflowVersion("$outputDir/pipeline_info/nf_core_dartseq_software_mqc_versions.yml"),
+                    // All stable path names, with a relative path
+                    stable_name,
+                    // All files with stable contents
+                    stable_path
+                ).match() }
+            )
+        }
+    }
+}

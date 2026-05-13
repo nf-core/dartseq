@@ -104,11 +104,16 @@ workflow PIPELINE_INITIALISATION {
     channel
         .fromList(samplesheetToList(params.input, "${projectDir}/assets/schema_input.json"))
         .map {
-            meta, fastq_1, fastq_2 ->
+            row ->
+                def meta = row[0]
+                def fastq_1 = row.size() > 1 ? row[1] : null
+                def fastq_2 = row.size() > 2 ? row[2] : null
+                def group = row.size() > 3 ? row[3] : null
+                def meta_with_group = group ? meta + [ group: group ] : meta
                 if (!fastq_2) {
-                    return [ meta.id, meta + [ single_end:true ], [ fastq_1 ] ]
+                    return [ meta.id, meta_with_group + [ single_end:true ], [ fastq_1 ] ]
                 } else {
-                    return [ meta.id, meta + [ single_end:false ], [ fastq_1, fastq_2 ] ]
+                    return [ meta.id, meta_with_group + [ single_end:false ], [ fastq_1, fastq_2 ] ]
                 }
         }
         .groupTuple()
@@ -184,6 +189,85 @@ workflow PIPELINE_COMPLETION {
 //
 def validateInputParameters() {
     genomeExistsError()
+    validatePipelineModeParameters()
+}
+
+def validatePipelineModeParameters() {
+    def allowed_trimmers = ['none', 'fastp', 'trimgalore']
+    if (!allowed_trimmers.contains(params.trimmer as String)) {
+        error("Invalid --trimmer '${params.trimmer}'. Allowed values: ${allowed_trimmers.join(', ')}")
+    }
+
+    def allowed_aligners = ['star', 'hisat2']
+    if (!allowed_aligners.contains(params.aligner as String)) {
+        error("Invalid --aligner '${params.aligner}'. Allowed values: ${allowed_aligners.join(', ')}")
+    }
+
+    if (!params.skip_alignment && params.aligner == 'star') {
+        if (!params.star_index && !params.fasta) {
+            error("STAR alignment selected but neither --star_index nor --fasta is set (or derivable from --genome)")
+        }
+        if (!params.gtf) {
+            error("STAR alignment selected but --gtf is not set (or not derivable from --genome)")
+        }
+    }
+
+    if (!params.skip_alignment && params.aligner == 'hisat2') {
+        if (!params.hisat2_index && !params.fasta) {
+            error("HISAT2 alignment selected but neither --hisat2_index nor --fasta is set")
+        }
+        if (!params.hisat2_splicesites && !params.gtf) {
+            error("HISAT2 alignment selected but neither --hisat2_splicesites nor --gtf is set")
+        }
+    }
+
+    if (params.run_bullseye && params.skip_alignment) {
+        error("--run_bullseye requires alignment outputs. Please disable --skip_alignment.")
+    }
+
+    if (params.run_bullseye && !params.bullseye_mock && !params.bullseye_annotation_file) {
+        error("--run_bullseye requires --bullseye_annotation_file unless --bullseye_mock is enabled")
+    }
+
+    if (params.run_bullseye && !params.bullseye_mock && !params.bullseye_code_dir) {
+        error("--run_bullseye requires --bullseye_code_dir unless --bullseye_mock is enabled")
+    }
+
+    if (params.run_bullseye_racfilter && !params.run_bullseye) {
+        error("--run_bullseye_racfilter requires --run_bullseye")
+    }
+
+    if (params.run_bullseye_racfilter && !params.bullseye_mock && !params.fasta) {
+        error("--run_bullseye_racfilter requires --fasta unless --bullseye_mock is enabled")
+    }
+
+    if (params.run_bullseye_gather_sites && !params.run_bullseye) {
+        error("--run_bullseye_gather_sites requires --run_bullseye")
+    }
+
+    if (params.run_bullseye_gather_sites && !(params.bullseye_gather_score || params.bullseye_gather_coverage || params.bullseye_gather_mutations)) {
+        error("--run_bullseye_gather_sites requires at least one of --bullseye_gather_score, --bullseye_gather_coverage, or --bullseye_gather_mutations")
+    }
+
+    if (params.run_bullseye_glm && !params.run_bullseye_gather_sites) {
+        error("--run_bullseye_glm requires --run_bullseye_gather_sites")
+    }
+
+    if (params.run_bullseye_glm && !params.bullseye_glm_mock && !params.bullseye_functions_r_file) {
+        error("--run_bullseye_glm requires --bullseye_functions_r_file unless --bullseye_glm_mock is enabled")
+    }
+
+    if (params.run_bullseye_glm && !params.bullseye_glm_coldata_file) {
+        error("--run_bullseye_glm requires --bullseye_glm_coldata_file")
+    }
+
+    if (params.run_rustqc && params.skip_alignment) {
+        error("--run_rustqc requires alignment outputs. Please disable --skip_alignment.")
+    }
+
+    if (params.run_rustqc && !params.rustqc_mock && !params.rustqc_cmd) {
+        error("--run_rustqc requires --rustqc_cmd unless --rustqc_mock is enabled")
+    }
 }
 
 //

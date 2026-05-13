@@ -1,0 +1,5 @@
+sample,fastq_1,fastq_2,group
+A03,/work_ikmb/sukmb662/test-datasets/data/dartseq/fastq/A03_R1.fastq.gz,/work_ikmb/sukmb662/test-datasets/data/dartseq/fastq/A03_R2.fastq.gz,control
+C03,/work_ikmb/sukmb662/test-datasets/data/dartseq/fastq/C03_R1.fastq.gz,/work_ikmb/sukmb662/test-datasets/data/dartseq/fastq/C03_R2.fastq.gz,control
+A04,/work_ikmb/sukmb662/test-datasets/data/dartseq/fastq/A04_R1.fastq.gz,/work_ikmb/sukmb662/test-datasets/data/dartseq/fastq/A04_R2.fastq.gz,dart
+E01,/work_ikmb/sukmb662/test-datasets/data/dartseq/fastq/E01_R1.fastq.gz,/work_ikmb/sukmb662/test-datasets/data/dartseq/fastq/E01_R2.fastq.gz,dart

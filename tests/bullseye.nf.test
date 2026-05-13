@@ -1,0 +1,67 @@
+nextflow_pipeline {
+
+    name "Bullseye test"
+    script "../main.nf"
+    tag "pipeline_bullseye"
+
+    test("Bullseye on STAR alignment output") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+                input = "$projectDir/assets/samplesheet_4samples_local.csv"
+
+                trimmer        = 'fastp'
+                aligner        = 'star'
+                skip_alignment = false
+
+                run_bullseye             = true
+                bullseye_container       = 'ghcr.io/nf-core/bullseye:0.1.1'
+                bullseye_code_dir        = '/opt/bullseye/Code'
+                bullseye_annotation_file = "$projectDir/assets/bullseye.test.refFlat"
+                bullseye_control_group   = 'control'
+
+                bullseye_parse_min_coverage   = 1
+                bullseye_min_edit             = 0
+                bullseye_max_edit             = 100
+                bullseye_edit_fold_threshold  = 1
+                bullseye_min_edit_sites       = 1
+                bullseye_edited_min_coverage  = 1
+                bullseye_control_min_coverage = 1
+                bullseye_replicates_min       = 1
+                bullseye_quant_coverage       = 1
+
+                run_rustqc = false
+
+                star_index = null
+                fasta      = "$projectDir/../test-datasets/data/dartseq/reference/genome.fa"
+                gtf        = "$projectDir/../test-datasets/data/dartseq/reference/genes.gtf"
+            }
+        }
+
+        then {
+            def a04VsA03 = file("$outputDir/bullseye/A04/A04.vs.A03.bed")
+            def e01VsA03 = file("$outputDir/bullseye/E01/E01.vs.A03.bed")
+            // stable_name: All files + folders in ${params.outdir}/ with a stable name
+            def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignore: ['pipeline_info/*.{html,json,txt}'])
+            // stable_path: All files in ${params.outdir}/ with stable content
+            def stable_path = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
+            assertAll(
+                { assert workflow.success },
+                { assert a04VsA03.exists() },
+                { assert a04VsA03.readLines().size() > 1 },
+                { assert e01VsA03.exists() },
+                { assert snapshot(
+                    // Number of successful tasks
+                    workflow.trace.succeeded().size(),
+                    // pipeline versions.yml file for multiqc from which Nextflow version is removed because we test pipelines on multiple Nextflow versions
+                    removeNextflowVersion("$outputDir/pipeline_info/nf_core_dartseq_software_mqc_versions.yml"),
+                    // All stable path names, with a relative path
+                    stable_name,
+                    // All files with stable contents
+                    stable_path
+                ).match() }
+            )
+        }
+    }
+}

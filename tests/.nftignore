@@ -9,4 +9,7 @@ multiqc/multiqc_data/llms-full.txt
 multiqc/multiqc_plots/{svg,pdf,png}/*.{svg,pdf,png}
 multiqc/multiqc_report.html
 fastqc/*_fastqc.{html,zip}
+fastp/*.fastp.html
+fastp/*.fastp.log
+star/*/*.Log.*
 pipeline_info/*.{html,json,txt,yml}

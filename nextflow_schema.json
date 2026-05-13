@@ -225,6 +225,220 @@
                     "description": "Suffix to add to the trace report filename. Default is the date and time in the format yyyy-MM-dd_HH-mm-ss.",
                     "hidden": true
                 },
+                "trimmer": {
+                    "type": "string",
+                    "description": "Read trimming tool to use.",
+                    "default": "fastp",
+                    "enum": ["none", "fastp", "trimgalore"]
+                },
+                "aligner": {
+                    "type": "string",
+                    "description": "Read aligner to use.",
+                    "default": "star",
+                    "enum": ["star", "hisat2"]
+                },
+                "skip_alignment": {
+                    "type": "boolean",
+                    "description": "Skip alignment stage (useful for smoke tests).",
+                    "default": false
+                },
+                "run_bullseye": {
+                    "type": "boolean",
+                    "description": "Run Bullseye downstream stage on aligned BAM files.",
+                    "default": false
+                },
+                "bullseye_mock": {
+                    "type": "boolean",
+                    "description": "Run Bullseye in mock mode without invoking Perl scripts.",
+                    "default": false
+                },
+                "bullseye_code_dir": {
+                    "type": "string",
+                    "description": "Path to Bullseye Code directory containing parseBAM.pl, Find_edit_site.pl, summarize_sites.pl and quant/quantify_sites.pl."
+                },
+                "bullseye_container": {
+                    "type": "string",
+                    "description": "Optional container image URI or local SIF for Bullseye local modules."
+                },
+                "bullseye_annotation_file": {
+                    "type": "string",
+                    "description": "Annotation file for Find_edit_site.pl (refFlat or compatible).",
+                    "format": "file-path"
+                },
+                "bullseye_control_group": {
+                    "type": "string",
+                    "description": "Sample group label to use as control when pairing matrices for Bullseye.",
+                    "default": "control"
+                },
+                "bullseye_parse_min_coverage": {
+                    "type": "integer",
+                    "description": "Minimum coverage passed to parseBAM.pl.",
+                    "default": 10
+                },
+                "bullseye_edit_type": {
+                    "type": "string",
+                    "description": "Conversion type for Find_edit_site.pl (for example C2U).",
+                    "default": "C2U"
+                },
+                "bullseye_min_edit": {
+                    "type": "number",
+                    "description": "Minimum edit percentage for Find_edit_site.pl.",
+                    "default": 10
+                },
+                "bullseye_max_edit": {
+                    "type": "number",
+                    "description": "Maximum edit percentage for Find_edit_site.pl.",
+                    "default": 80
+                },
+                "bullseye_edit_fold_threshold": {
+                    "type": "number",
+                    "description": "Minimum edit fold threshold over control for Find_edit_site.pl.",
+                    "default": 1.5
+                },
+                "bullseye_min_edit_sites": {
+                    "type": "integer",
+                    "description": "Minimum number of edits to report a site.",
+                    "default": 2
+                },
+                "bullseye_edited_min_coverage": {
+                    "type": "integer",
+                    "description": "Minimum edited matrix coverage for Find_edit_site.pl.",
+                    "default": 10
+                },
+                "bullseye_control_min_coverage": {
+                    "type": "integer",
+                    "description": "Minimum control matrix coverage for Find_edit_site.pl.",
+                    "default": 10
+                },
+                "bullseye_replicates_min": {
+                    "type": "integer",
+                    "description": "Minimum replicate count used by summarize_sites.pl.",
+                    "default": 1
+                },
+                "bullseye_quant_coverage": {
+                    "type": "integer",
+                    "description": "Coverage threshold for quantify_sites.pl.",
+                    "default": 10
+                },
+                "run_bullseye_racfilter": {
+                    "type": "boolean",
+                    "description": "Run RAC motif filtering on Bullseye quantified BED files.",
+                    "default": false
+                },
+                "bullseye_rac_remove_seq": {
+                    "type": "boolean",
+                    "description": "If true, remove RAC sequence column from RAC-filtered output BED.",
+                    "default": true
+                },
+                "run_bullseye_gather_sites": {
+                    "type": "boolean",
+                    "description": "Aggregate Bullseye site-level outputs across samples using gather_sites.pl.",
+                    "default": false
+                },
+                "bullseye_gather_score": {
+                    "type": "boolean",
+                    "description": "Request score matrix output from gather_sites.pl.",
+                    "default": true
+                },
+                "bullseye_gather_coverage": {
+                    "type": "boolean",
+                    "description": "Request coverage matrix output from gather_sites.pl.",
+                    "default": true
+                },
+                "bullseye_gather_mutations": {
+                    "type": "boolean",
+                    "description": "Request mutation-count matrix output from gather_sites.pl.",
+                    "default": true
+                },
+                "run_bullseye_glm": {
+                    "type": "boolean",
+                    "description": "Run Bullseye R GLM helper on gathered coverage and mutation tables.",
+                    "default": false
+                },
+                "bullseye_glm_mock": {
+                    "type": "boolean",
+                    "description": "Run Bullseye GLM module in mock mode.",
+                    "default": false
+                },
+                "bullseye_r_container": {
+                    "type": "string",
+                    "description": "Optional container image URI for Bullseye R GLM module."
+                },
+                "bullseye_functions_r_file": {
+                    "type": "string",
+                    "description": "Path to functions.R used by the Bullseye GLM helper.",
+                    "format": "file-path",
+                    "default": "/opt/bullseye/example_data/markdown/functions.R"
+                },
+                "bullseye_glm_coldata_file": {
+                    "type": "string",
+                    "description": "Path to a tab-delimited sample metadata file containing at least a 'sample' column.",
+                    "format": "file-path"
+                },
+                "bullseye_glm_design": {
+                    "type": "string",
+                    "description": "R formula string used as design in Bullseye GLM helper.",
+                    "default": "~group"
+                },
+                "bullseye_glm_link": {
+                    "type": "string",
+                    "description": "Link/model option passed to Bullseye helper function.",
+                    "default": "betabin",
+                    "enum": ["betabin", "bin", "quasibinomial", "betareg"]
+                },
+                "bullseye_glm_min_cov": {
+                    "type": "integer",
+                    "description": "Minimum coverage threshold passed to Bullseye GLM helper.",
+                    "default": 10
+                },
+                "run_rustqc": {
+                    "type": "boolean",
+                    "description": "Run RustQC on aligned BAM files.",
+                    "default": false
+                },
+                "rustqc_cmd": {
+                    "type": "string",
+                    "description": "Command template used to run RustQC. Supports placeholders {bam} and {prefix}; if omitted, the module appends '<bam> <prefix>'. Command must create '{prefix}.rustqc.tsv'."
+                },
+                "rustqc_container": {
+                    "type": "string",
+                    "description": "Container image URI or local SIF path used for the RUSTQC process."
+                },
+                "rustqc_mock": {
+                    "type": "boolean",
+                    "description": "Emit mock RustQC outputs instead of executing RustQC (for testing).",
+                    "default": false
+                },
+                "star_index": {
+                    "type": "string",
+                    "description": "Path to STAR index directory.",
+                    "format": "directory-path"
+                },
+                "star_ignore_sjdbgtf": {
+                    "type": "boolean",
+                    "description": "When using pre-built STAR index, do not pass the GTF file at the mapping step.",
+                    "default": false
+                },
+                "gtf": {
+                    "type": "string",
+                    "description": "Path to annotation GTF file.",
+                    "format": "file-path"
+                },
+                "hisat2_index": {
+                    "type": "string",
+                    "description": "Path to HISAT2 index directory.",
+                    "format": "directory-path"
+                },
+                "hisat2_splicesites": {
+                    "type": "string",
+                    "description": "Path to HISAT2 splice sites file.",
+                    "format": "file-path"
+                },
+                "hisat2_build_memory": {
+                    "type": "string",
+                    "description": "Minimum memory threshold for HISAT2 index build to include splice-site/exon hints.",
+                    "default": "8.GB"
+                },
                 "help": {
                     "type": ["boolean", "string"],
                     "description": "Display the help message."
@@ -236,6 +450,11 @@
                 "show_hidden": {
                     "type": "boolean",
                     "description": "Display hidden parameters in the help message (only works when --help or --help_full are provided)."
+                },
+                "test_root": {
+                    "type": "string",
+                    "description": "Root directory for test data and caches. Defaults to DARTSEQ_TEST_ROOT environment variable.",
+                    "hidden": true
                 }
             }
         }
