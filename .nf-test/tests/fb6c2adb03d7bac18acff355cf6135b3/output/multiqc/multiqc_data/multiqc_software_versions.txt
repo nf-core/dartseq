@@ -1,8 +1,0 @@
-Sample	fastp	fastqc	rustqc	samtools	gawk	star	nf-core/dartseq	Nextflow
-FastQC		0.12.1						
-RUSTQC			mock					
-SAMTOOLS_INDEX				1.23.1				
-STAR_ALIGN				1.21	5.1.0	2.7.11b		
-STAR_GENOMEGENERATE				1.21	5.1.0	2.7.11b		
-Workflow							v1.0.0dev	25.10.0
-fastp	1.1.0							

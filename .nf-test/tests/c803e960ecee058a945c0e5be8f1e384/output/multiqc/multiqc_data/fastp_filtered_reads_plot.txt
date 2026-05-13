@@ -1,5 +1,0 @@
-Sample	Passed Filter	Low Quality	Too Many N	Low Complexity	Too Short	Too Long
-A03	49570.0	114.0	12.0	nan	304.0	0.0
-A04	49656.0	108.0	12.0	nan	224.0	0.0
-C03	49586.0	134.0	14.0	nan	266.0	0.0
-E01	49428.0	158.0	14.0	nan	400.0	0.0

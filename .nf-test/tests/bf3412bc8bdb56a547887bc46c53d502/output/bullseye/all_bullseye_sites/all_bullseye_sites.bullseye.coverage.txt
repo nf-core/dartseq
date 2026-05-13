@@ -1,1 +1,0 @@
-#chr	start	end	cluster	strand	A04.bullseye.RAC	E01.bullseye.RAC

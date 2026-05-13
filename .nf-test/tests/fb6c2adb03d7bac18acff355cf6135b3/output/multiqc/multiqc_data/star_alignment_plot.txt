@@ -1,5 +1,0 @@
-Sample	Uniquely mapped	Mapped to multiple loci	Unmapped: too short	Unmapped: other
-A03	37.0	23.0	16456.0	8269.0
-A04	50.0	21.0	16430.0	8327.0
-C03	56.0	21.0	16348.0	8368.0
-E01	45.0	24.0	16470.0	8175.0

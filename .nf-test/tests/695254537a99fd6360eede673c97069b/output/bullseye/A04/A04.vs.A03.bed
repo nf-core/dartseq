@@ -1,3 +1,0 @@
-#chr start end gene score strand control_ratio control_total dart_ratio dart_total conversion
-chr22_test	94538	94539	MIF-AS1|CDS|C2U|mut=1|NA	0.2000	-	0	6	0.2000	5	C2U
-chr22_test	94569	94570	MIF-AS1|CDS|C2U|mut=1|NA	0.3333	-	0	4	0.3333	3	C2U

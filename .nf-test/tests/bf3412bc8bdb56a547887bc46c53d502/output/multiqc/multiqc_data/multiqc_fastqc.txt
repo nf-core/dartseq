@@ -1,9 +1,0 @@
-Sample	Filename	File type	Encoding	Total Sequences	Total Bases	Sequences flagged as poor quality	Sequence length	%GC	total_deduplicated_percentage	avg_sequence_length	median_sequence_length	basic_statistics	per_base_sequence_quality	per_tile_sequence_quality	per_sequence_quality_scores	per_base_sequence_content	per_sequence_gc_content	per_base_n_content	sequence_length_distribution	sequence_duplication_levels	overrepresented_sequences	adapter_content
-A03_1	A03_1.gz	Conventional base calls	Sanger / Illumina 1.9	25000.0	1.2 Mbp	0.0	22-51	48.0	97.3	50.48856	51	pass	warn	fail	pass	fail	pass	pass	warn	pass	pass	pass
-A03_2	A03_2.gz	Conventional base calls	Sanger / Illumina 1.9	25000.0	1.2 Mbp	0.0	20-51	49.0	97.088	50.46996	51	pass	pass	warn	pass	fail	pass	pass	warn	pass	warn	pass
-A04_1	A04_1.gz	Conventional base calls	Sanger / Illumina 1.9	25000.0	1.2 Mbp	0.0	22-51	49.0	98.42	50.47424	51	pass	warn	warn	pass	fail	pass	pass	warn	pass	pass	pass
-A04_2	A04_2.gz	Conventional base calls	Sanger / Illumina 1.9	25000.0	1.2 Mbp	0.0	21-51	49.0	97.408	50.47604	51	pass	warn	warn	pass	fail	pass	pass	warn	pass	warn	pass
-C03_1	C03_1.gz	Conventional base calls	Sanger / Illumina 1.9	25000.0	1.2 Mbp	0.0	20-51	48.0	98.024	50.47084	51	pass	warn	warn	pass	fail	warn	pass	warn	pass	pass	pass
-C03_2	C03_2.gz	Conventional base calls	Sanger / Illumina 1.9	25000.0	1.2 Mbp	0.0	20-51	49.0	97.968	50.48012	51	pass	pass	warn	pass	fail	pass	pass	warn	pass	warn	pass
-E01_1	E01_1.gz	Conventional base calls	Sanger / Illumina 1.9	25000.0	1.2 Mbp	0.0	22-51	48.0	97.328	50.50444	51	pass	warn	warn	pass	fail	pass	pass	warn	pass	pass	pass
-E01_2	E01_2.gz	Conventional base calls	Sanger / Illumina 1.9	25000.0	1.2 Mbp	0.0	20-51	49.0	97.052	50.47312	51	pass	warn	warn	pass	fail	pass	pass	warn	pass	warn	pass
