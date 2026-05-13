@@ -22,22 +22,23 @@
 
 ## Introduction
 
-**nf-core/dartseq** is a bioinformatics pipeline that ...
-
 **nf-core/dartseq** is a workflow for DART-seq style RNA sequencing analyses with optional RNA editing downstream steps.
 It accepts single-end or paired-end FASTQ input, performs read QC and alignment, and can run Bullseye- and RustQC-based
 post-processing. Standard outputs include per-sample QC reports, alignments, MultiQC summaries, and optional edited-site tables.
 
 ![nf-core/dartseq workflow overview](docs/images/dartseq_metromap.png)
 
-Default pipeline steps:
+Workflow overview:
 
-1. Adapter and quality trimming (`fastp` or `Trim Galore`)
-2. Read QC reporting with [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
-3. Alignment with STAR or HISAT2
-4. Optional Bullseye site parsing, quantification, and filtering
-5. Optional RustQC summaries
-6. Aggregated reporting with [MultiQC](http://multiqc.info/)
+1. Parse and validate the input samplesheet.
+2. Trim reads with `fastp` or `Trim Galore` (or skip trimming if requested).
+3. Run per-sample quality control with [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/).
+4. Build or use provided aligner references (STAR or HISAT2).
+5. Align reads and produce sorted BAM files plus index files.
+6. Run optional Bullseye editing analysis:
+  parse BAM, summarize sites, quantify edits, compare against controls, and optionally RAC filter / gather sites / GLM.
+7. Run optional RustQC summaries on alignments.
+8. Aggregate run-wide summaries and software versions with [MultiQC](http://multiqc.info/).
 
 ## Usage
 
