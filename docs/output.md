@@ -6,7 +6,9 @@ This document describes the output produced by the pipeline. Most of the plots a
 
 The directories listed below will be created in the results directory after the pipeline has finished. All paths are relative to the top-level results directory.
 
-<!-- TODO nf-core: Write this documentation describing your workflow's output -->
+This section summarizes the key output folders produced by default profiling modes.
+When optional modules are enabled, additional directories such as `bullseye/` and `rustqc/`
+are also written with sample-level result files.
 
 ## Pipeline overview
 

@@ -1,0 +1,43 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "UTILS_NFCORE_DARTSEQ_PIPELINE"
+description: Pipeline-specific utility subworkflow for nf-core/dartseq initialisation, completion hooks, and validation
+keywords:
+  - utility
+  - nf-core
+  - dartseq
+  - initialisation
+  - completion
+components:
+  - UTILS_NEXTFLOW_PIPELINE
+  - UTILS_NFSCHEMA_PLUGIN
+  - UTILS_NFCORE_PIPELINE
+input:
+  - version:
+      type: boolean
+      description: Display version and exit.
+  - validate_params:
+      type: boolean
+      description: Validate parameters against schema at runtime.
+  - monochrome_logs:
+      type: boolean
+      description: Disable ANSI colour logs.
+  - nextflow_cli_args:
+      type: list
+      description: Positional Nextflow CLI arguments.
+  - outdir:
+      type: directory
+      description: Output directory.
+  - input:
+      type: file
+      description: Path to input samplesheet.
+output:
+  - samplesheet:
+      type: list
+      description: Validated and grouped samplesheet channel.
+  - versions:
+      type: list
+      description: Collected versions channel.
+authors:
+  - "@brovolia"
+maintainers:
+  - "@brovolia"

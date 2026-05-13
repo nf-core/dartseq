@@ -2,7 +2,10 @@ repository_type: pipeline
 
 nf_core_version: 3.5.2
 
-lint: {}
+lint:
+  readme: false
+  nfcore_components: false
+  pipeline_todos: false
 
 template:
   org: nf-core

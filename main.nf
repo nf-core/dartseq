@@ -26,9 +26,7 @@ include { getGenomeAttribute      } from './subworkflows/local/utils_nfcore_dart
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-// TODO nf-core: Remove this line if you don't need a FASTA file
-//   This is an example of how to use getGenomeAttribute() to fetch parameters
-//   from igenomes.config using `--genome`
+// Resolve reference defaults from genomes config when `--genome` is provided.
 params.fasta = getGenomeAttribute('fasta')
 params.star_index = params.star_index ?: getGenomeAttribute('star')
 params.gtf = params.gtf ?: getGenomeAttribute('gtf')

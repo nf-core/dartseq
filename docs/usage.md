@@ -6,7 +6,9 @@
 
 ## Introduction
 
-<!-- TODO nf-core: Add documentation about anything specific to running your pipeline. For general topics, please point to (and add to) the main nf-core website. -->
+This pipeline supports RNA editing focused processing with optional Bullseye and RustQC steps.
+For Bullseye runs, ensure that the annotation file matches the reference used for alignment.
+For STAR-based alignment with pre-built indices, use `--star_ignore_sjdbgtf` when the index already encodes splice junction annotation.
 
 ## Samplesheet input
 
