@@ -175,16 +175,12 @@
                 "pipeline_info/nf_core_dartseq_software_mqc_versions.yml"
             ],
             [
-                "A03.fastp.json:md5,d87b2c3c45d19fb804f9efad30dc04d3",
                 "A03_R1.fastp.fastq.gz:md5,82e59ca4d67c58943abc1a4b8438d43f",
                 "A03_R2.fastp.fastq.gz:md5,1e852b119d0877752ee949f23aaf3cd0",
-                "A04.fastp.json:md5,f218cdb8eada1026b28d92ff68d44e30",
                 "A04_R1.fastp.fastq.gz:md5,e40057a79a3410ece050e5d7267133ed",
                 "A04_R2.fastp.fastq.gz:md5,5bee8b8d857694667b7df26195dbc0cb",
-                "C03.fastp.json:md5,98445c00251a7b9743f7268067e782ed",
                 "C03_R1.fastp.fastq.gz:md5,e3a18a39dcec272f70776516825cbf24",
                 "C03_R2.fastp.fastq.gz:md5,c769cf8194ff77beb89b7b76e887fc1f",
-                "E01.fastp.json:md5,db253729e8f2c0f89f36dfbba125527f",
                 "E01_R1.fastp.fastq.gz:md5,05622c00202e7e40427282ea160ed76b",
                 "E01_R2.fastp.fastq.gz:md5,d5a4030c39f4828d8dcc0207b63f3ef9",
                 "fastp-insert-size-plot.txt:md5,2f46872417579e6d2e7e3706b58644c7",
@@ -221,6 +217,6 @@
             "nf-test": "0.9.3",
             "nextflow": "25.10.0"
         },
-        "timestamp": "2026-05-11T11:35:25.28095052"
+        "timestamp": "2026-05-20T16:10:00.09326315"
     }
 }

@@ -1,0 +1,53 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://raw.githubusercontent.com/nf-core/dartseq/master/assets/schema_contrasts.json",
+    "title": "nf-core/dartseq contrasts schema",
+    "description": "Schema for the contrasts CSV file used by nf-core/dartseq",
+    "type": "array",
+    "items": {
+        "type": "object",
+        "properties": {
+            "contrast_id": {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9_-]+$",
+                "errorMessage": "Contrast ID must contain only alphanumeric characters, underscores, or hyphens"
+            },
+            "edited_group": {
+                "type": "string",
+                "pattern": "^\\S+$",
+                "errorMessage": "Edited group label cannot contain spaces"
+            },
+            "control_group": {
+                "type": "string",
+                "pattern": "^\\S+$",
+                "errorMessage": "Control group label cannot contain spaces"
+            },
+            "mode": {
+                "type": "string",
+                "enum": ["standard", "differential"],
+                "errorMessage": "Mode must be either 'standard' or 'differential'"
+            },
+            "min_edit": {
+                "type": "string",
+                "pattern": "^[0-9]+$",
+                "errorMessage": "min_edit must be a positive integer"
+            },
+            "max_edit": {
+                "type": "string",
+                "pattern": "^[0-9]+$",
+                "errorMessage": "max_edit must be a positive integer"
+            },
+            "fold_threshold": {
+                "type": "string",
+                "pattern": "^[0-9]+(\\.[0-9]+)?$",
+                "errorMessage": "fold_threshold must be a positive number"
+            },
+            "min_sites": {
+                "type": "string",
+                "pattern": "^[0-9]+$",
+                "errorMessage": "min_sites must be a positive integer"
+            }
+        },
+        "required": ["contrast_id", "edited_group", "control_group"]
+    }
+}

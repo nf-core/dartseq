@@ -6,7 +6,7 @@
 
 ## Introduction
 
-This pipeline supports RNA editing focused processing with optional Bullseye and RustQC steps.
+This pipeline supports RNA editing focused processing with Bullseye and RustQC steps.
 For Bullseye runs, ensure that the annotation file matches the reference used for alignment.
 For STAR-based alignment with pre-built indices, use `--star_ignore_sjdbgtf` when the index already encodes splice junction annotation.
 
@@ -96,6 +96,70 @@ genome: 'GRCh37'
 ```
 
 You can also generate such `YAML`/`JSON` files via [nf-core/launch](https://nf-co.re/launch).
+
+## Bullseye Contrasts
+
+The Bullseye DART-seq analysis supports flexible comparison strategies through a contrasts file. This allows you to specify exact sample group comparisons and customize detection parameters per contrast.
+
+### When to use contrasts
+
+Use contrasts when you need:
+
+- **Explicit control** over which groups are compared (e.g., factorial designs)
+- **Differential mode** to compare two DART samples (both have editing)
+- **Per-contrast thresholds** for different biological contexts
+
+### Contrasts file format
+
+Create a CSV file with these columns:
+
+| Column           | Required | Description                                                    | Default      |
+| ---------------- | -------- | -------------------------------------------------------------- | ------------ |
+| `contrast_id`    | Yes      | Unique identifier for this comparison                          | -            |
+| `edited_group`   | Yes      | Sample group containing editing signal                         | -            |
+| `control_group`  | Yes      | Sample group used as control                                   | -            |
+| `mode`           | No       | `standard` (DART vs non-DART) or `differential` (DART vs DART) | `standard`   |
+| `min_edit`       | No       | Minimum editing percentage to call a site                      | 5 or 3\*     |
+| `max_edit`       | No       | Maximum editing percentage (filters noisy sites)               | 90 or 95\*   |
+| `fold_threshold` | No       | Fold-change threshold vs control                               | 1.5 or 1.2\* |
+| `min_sites`      | No       | Minimum number of edited sites required                        | 3            |
+
+\*Defaults depend on mode: stricter for `standard`, relaxed for `differential`.
+
+### Example: Simple comparison
+
+```csv
+contrast_id,edited_group,control_group
+baseline_m6A,dart,control
+```
+
+### Example: Factorial design
+
+```csv
+contrast_id,edited_group,control_group,mode,min_edit,fold_threshold
+m6A_noninfected,dart_ni,control_ni,standard,5,1.5
+m6A_infected,dart_inf,control_inf,standard,5,1.5
+infection_effect,dart_inf,dart_ni,differential,3,1.2
+```
+
+In this factorial design:
+
+- First two contrasts detect m6A in non-infected and infected conditions (DART vs non-DART)
+- Third contrast finds infection-induced m6A changes (DART vs DART with relaxed thresholds)
+
+### Usage
+
+Provide the contrasts file via the `--bullseye_contrasts` parameter:
+
+```bash
+nextflow run nf-core/dartseq \
+  --input samplesheet.csv \
+  --bullseye_contrasts contrasts.csv \
+  --run_bullseye \
+  ...
+```
+
+The `group` column in your samplesheet must match the group names used in the contrasts file.
 
 ### Updating the pipeline
 

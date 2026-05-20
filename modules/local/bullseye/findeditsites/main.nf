@@ -15,7 +15,16 @@ process BULLSEYE_FIND_EDIT_SITES {
     task.ext.when == null || task.ext.when
 
     script:
-    prefix = task.ext.prefix ?: "${meta.id}.vs.${control_meta.id}"
+    // Use contrast-specific parameters if available, otherwise use global params
+    def contrast = meta.contrast_params ?: [:]
+    def min_edit = contrast.min_edit ?: params.bullseye_min_edit
+    def max_edit = contrast.max_edit ?: params.bullseye_max_edit
+    def fold_threshold = contrast.fold_threshold ?: params.bullseye_edit_fold_threshold
+    def min_sites = contrast.min_sites ?: params.bullseye_min_edit_sites
+    def contrast_id = meta.contrast_id ?: 'default'
+    
+    prefix = task.ext.prefix ?: "${meta.id}.vs.${control_meta.id}.${contrast_id}"
+    
     if (params.bullseye_mock) {
         """
         cat > ${prefix}.bed << 'EOF'
@@ -30,14 +39,14 @@ process BULLSEYE_FIND_EDIT_SITES {
     } else {
         """
         perl ${params.bullseye_code_dir}/Find_edit_site.pl \\
-            --annotationFile ${annotation_file} \
+            --annotationFile ${annotation_file} \\
             --EditedMatrix ${edited_matrix} \\
             --controlMatrix ${control_matrix} \\
             --editType ${params.bullseye_edit_type} \\
-            --minEdit ${params.bullseye_min_edit} \\
-            --maxEdit ${params.bullseye_max_edit} \\
-            --editFoldThreshold ${params.bullseye_edit_fold_threshold} \\
-            --MinEditSites ${params.bullseye_min_edit_sites} \\
+            --minEdit ${min_edit} \\
+            --maxEdit ${max_edit} \\
+            --editFoldThreshold ${fold_threshold} \\
+            --MinEditSites ${min_sites} \\
             --EditedMinCoverage ${params.bullseye_edited_min_coverage} \\
             --ControlMinCoverage ${params.bullseye_control_min_coverage} \\
             --outfile ${prefix}.bed

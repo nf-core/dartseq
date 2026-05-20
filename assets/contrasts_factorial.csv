@@ -1,0 +1,4 @@
+contrast_id,edited_group,control_group,mode,min_edit,max_edit,fold_threshold,min_sites
+m6A_noninfected,dart_ni,control_ni,standard,5,90,1.5,3
+m6A_infected,dart_inf,control_inf,standard,5,90,1.5,3
+infection_effect,dart_inf,dart_ni,differential,3,95,1.2,2

@@ -1,0 +1,2 @@
+contrast_id,edited_group,control_group,mode,min_edit,max_edit,fold_threshold,min_sites
+baseline_m6A,dart,control,standard,5,90,1.5,3

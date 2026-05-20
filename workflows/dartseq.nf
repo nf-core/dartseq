@@ -181,28 +181,131 @@ workflow DARTSEQ {
     if (params.run_bullseye) {
         // Stage annotation into Bullseye tasks so it is always visible inside containers.
         def bullseye_annotation_path = params.bullseye_mock ? "$projectDir/assets/bullseye.mock.refFlat" : params.bullseye_annotation_file
-        ch_bullseye_annotation = Channel.value(file(bullseye_annotation_path, checkIfExists: true))
+        ch_bullseye_annotation = channel.value(file(bullseye_annotation_path, checkIfExists: true))
 
         BULLSEYE_PARSEBAM ( ch_aligned_bam )
 
-        def control_group = (params.bullseye_control_group ?: 'control').toString().toLowerCase()
-        ch_bullseye_control = BULLSEYE_PARSEBAM.out.matrix.filter { meta, _matrix, _tbi ->
-            (meta.group ?: '').toString().toLowerCase() == control_group
-        }
-        ch_bullseye_edited = BULLSEYE_PARSEBAM.out.matrix.filter { meta, _matrix, _tbi ->
-            (meta.group ?: '').toString().toLowerCase() != control_group
-        }
+        // Two modes: contrast-based (explicit comparisons) or group-based (all edited vs all control)
+        if (params.bullseye_contrasts) {
+            // Parse contrasts CSV and create specific pairs
+            ch_contrasts = channel
+                .fromPath(params.bullseye_contrasts, checkIfExists: true)
+                .splitCsv(header: true)
+                .map { row ->
+                    def mode = row.mode ?: 'standard'
+                    def min_edit = row.min_edit ?: (mode == 'differential' ? '3' : '5')
+                    def max_edit = row.max_edit ?: (mode == 'differential' ? '95' : '90')
+                    def fold_threshold = row.fold_threshold ?: (mode == 'differential' ? '1.2' : '1.5')
+                    def min_sites = row.min_sites ?: '3'
+                    [
+                        contrast_id: row.contrast_id,
+                        edited_group: row.edited_group,
+                        control_group: row.control_group,
+                        mode: mode,
+                        min_edit: min_edit,
+                        max_edit: max_edit,
+                        fold_threshold: fold_threshold,
+                        min_sites: min_sites
+                    ]
+                }
 
-        ch_bullseye_pairs = ch_bullseye_edited
-            .combine(ch_bullseye_control)
-            .map { edited_meta, edited_matrix, edited_tbi, control_meta, control_matrix, control_tbi ->
-                [ edited_meta, edited_matrix, edited_tbi, control_meta, control_matrix, control_tbi ]
+            // For each contrast, find matching samples and create pairs
+            ch_bullseye_pairs = ch_contrasts
+                .combine(BULLSEYE_PARSEBAM.out.matrix)
+                .branch {
+                    contrast, meta, matrix, tbi ->
+                        edited: (meta.group ?: '').toString() == contrast.edited_group
+                            return [ contrast, meta, matrix, tbi ]
+                        control: (meta.group ?: '').toString() == contrast.control_group
+                            return [ contrast, meta, matrix, tbi ]
+                        other: true
+                }
+            
+            // Group edited and control samples per contrast
+            ch_bullseye_edited_per_contrast = ch_bullseye_pairs.edited
+                .map { contrast, meta, matrix, tbi -> 
+                    [ contrast.contrast_id, contrast, meta, matrix, tbi ] 
+                }
+                .groupTuple()
+            
+            ch_bullseye_control_per_contrast = ch_bullseye_pairs.control
+                .map { contrast, meta, matrix, tbi -> 
+                    [ contrast.contrast_id, contrast, meta, matrix, tbi ] 
+                }
+                .groupTuple()
+
+            // Join and create all pairs within each contrast
+            ch_bullseye_pairs = ch_bullseye_edited_per_contrast
+                .join(ch_bullseye_control_per_contrast)
+                .flatMap { _contrast_id, contrast_list, edited_meta_list, edited_matrix_list, edited_tbi_list, 
+                           _contrast_list2, control_meta_list, control_matrix_list, control_tbi_list ->
+                    def contrast = contrast_list[0]  // All entries have same contrast info
+                    def pairs = []
+                    edited_meta_list.eachWithIndex { edited_meta, ei ->
+                        control_meta_list.eachWithIndex { control_meta, ci ->
+                            // Enrich meta with contrast info
+                            def enriched_meta = edited_meta + [ 
+                                contrast_id: contrast.contrast_id,
+                                contrast_mode: contrast.mode 
+                            ]
+                            pairs << [
+                                enriched_meta,
+                                edited_matrix_list[ei],
+                                edited_tbi_list[ei],
+                                control_meta,
+                                control_matrix_list[ci],
+                                control_tbi_list[ci],
+                                contrast
+                            ]
+                        }
+                    }
+                    return pairs
+                }
+
+            // Extract unique edited samples for quantification (collect all edited_group values from contrasts)
+            ch_bullseye_edited = ch_contrasts
+                .map { contrast -> contrast.edited_group }
+                .unique()
+                .combine(BULLSEYE_PARSEBAM.out.matrix)
+                .filter { edited_group, meta, _matrix, _tbi ->
+                    (meta.group ?: '').toString() == edited_group
+                }
+                .map { _edited_group, meta, matrix, tbi ->
+                    [ meta, matrix, tbi ]
+                }
+
+        } else {
+            // Legacy mode: all edited vs all control based on group label
+            def control_group = (params.bullseye_control_group ?: 'control').toString().toLowerCase()
+            ch_bullseye_control = BULLSEYE_PARSEBAM.out.matrix.filter { meta, _matrix, _tbi ->
+                (meta.group ?: '').toString().toLowerCase() == control_group
+            }
+            ch_bullseye_edited = BULLSEYE_PARSEBAM.out.matrix.filter { meta, _matrix, _tbi ->
+                (meta.group ?: '').toString().toLowerCase() != control_group
             }
 
+            // Use default contrast parameters
+            def default_contrast = [
+                contrast_id: 'default',
+                mode: 'standard',
+                min_edit: params.bullseye_min_edit.toString(),
+                max_edit: params.bullseye_max_edit.toString(),
+                fold_threshold: params.bullseye_edit_fold_threshold.toString(),
+                min_sites: params.bullseye_min_edit_sites.toString()
+            ]
+
+            ch_bullseye_pairs = ch_bullseye_edited
+                .combine(ch_bullseye_control)
+                .map { edited_meta, edited_matrix, edited_tbi, control_meta, control_matrix, control_tbi ->
+                    [ edited_meta, edited_matrix, edited_tbi, control_meta, control_matrix, control_tbi, default_contrast ]
+                }
+        }
+
+        // Add annotation file to all pairs
         ch_bullseye_pairs_with_annotation = ch_bullseye_pairs
             .combine(ch_bullseye_annotation)
-            .map { edited_meta, edited_matrix, edited_tbi, control_meta, control_matrix, control_tbi, annotation_file ->
-                [ edited_meta, edited_matrix, edited_tbi, control_meta, control_matrix, control_tbi, annotation_file ]
+            .map { edited_meta, edited_matrix, edited_tbi, control_meta, control_matrix, control_tbi, contrast, annotation_file ->
+                [ edited_meta + [ contrast_params: contrast ], edited_matrix, edited_tbi, control_meta, control_matrix, control_tbi, annotation_file ]
             }
 
         BULLSEYE_FIND_EDIT_SITES ( ch_bullseye_pairs_with_annotation )

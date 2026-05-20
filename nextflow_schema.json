@@ -267,8 +267,13 @@
                 },
                 "bullseye_control_group": {
                     "type": "string",
-                    "description": "Sample group label to use as control when pairing matrices for Bullseye.",
+                    "description": "Sample group label to use as control when pairing matrices for Bullseye (legacy mode, use bullseye_contrasts for explicit control).",
                     "default": "control"
+                },
+                "bullseye_contrasts": {
+                    "type": "string",
+                    "description": "Path to CSV file defining specific Bullseye comparisons with per-contrast parameters. When provided, overrides bullseye_control_group. See assets/contrasts.csv for format.",
+                    "format": "file-path"
                 },
                 "bullseye_parse_min_coverage": {
                     "type": "integer",

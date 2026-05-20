@@ -11,5 +11,14 @@ multiqc/multiqc_report.html
 fastqc/*_fastqc.{html,zip}
 fastp/*.fastp.html
 fastp/*.fastp.log
+fastp/*.fastp.json
 star/*/*.Log.*
+hisat2/*/*.log
+hisat2/*/*.summary.txt
+hisat2/*/*.bam
+hisat2/*/*.bam.bai
+star/*/*.bam
+star/*/*.bam.bai
 pipeline_info/*.{html,json,txt,yml}
+**/*.log
+**/*versions.yml

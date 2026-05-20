@@ -30,12 +30,36 @@ nextflow_pipeline {
         }
 
         then {
+            // Check BAM files exist and are non-empty
+            def a03_bam = file("$outputDir/hisat2/A03/A03.sorted.bam")
+            def a04_bam = file("$outputDir/hisat2/A04/A04.sorted.bam")
+            def c03_bam = file("$outputDir/hisat2/C03/C03.sorted.bam")
+            def e01_bam = file("$outputDir/hisat2/E01/E01.sorted.bam")
+            def a03_bai = file("$outputDir/hisat2/A03/A03.sorted.bam.bai")
+            def a04_bai = file("$outputDir/hisat2/A04/A04.sorted.bam.bai")
+            def c03_bai = file("$outputDir/hisat2/C03/C03.sorted.bam.bai")
+            def e01_bai = file("$outputDir/hisat2/E01/E01.sorted.bam.bai")
+            
             // stable_name: All files + folders in ${params.outdir}/ with a stable name
             def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignore: ['pipeline_info/*.{html,json,txt}'])
             // stable_path: All files in ${params.outdir}/ with stable content
             def stable_path = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
             assertAll(
                 { assert workflow.success },
+                // Verify BAM files exist and have content
+                { assert a03_bam.exists() },
+                { assert a03_bam.size() > 0 },
+                { assert a04_bam.exists() },
+                { assert a04_bam.size() > 0 },
+                { assert c03_bam.exists() },
+                { assert c03_bam.size() > 0 },
+                { assert e01_bam.exists() },
+                { assert e01_bam.size() > 0 },
+                // Verify BAI indices exist
+                { assert a03_bai.exists() },
+                { assert a04_bai.exists() },
+                { assert c03_bai.exists() },
+                { assert e01_bai.exists() },
                 { assert snapshot(
                     // Number of successful tasks
                     workflow.trace.succeeded().size(),

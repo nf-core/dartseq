@@ -50,8 +50,8 @@ nextflow_pipeline {
         }
 
         then {
-            def a04VsA03 = file("$outputDir/bullseye/A04/A04.vs.A03.bed")
-            def e01VsA03 = file("$outputDir/bullseye/E01/E01.vs.A03.bed")
+            def a04VsA03 = file("$outputDir/bullseye/A04/A04.vs.A03.default.bed")
+            def e01VsA03 = file("$outputDir/bullseye/E01/E01.vs.A03.default.bed")
             def a04Rac = file("$outputDir/bullseye/A04/A04.bullseye.RAC.bed")
             def e01Rac = file("$outputDir/bullseye/E01/E01.bullseye.RAC.bed")
             // stable_name: All files + folders in ${params.outdir}/ with a stable name
