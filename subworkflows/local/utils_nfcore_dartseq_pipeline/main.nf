@@ -224,8 +224,8 @@ def validatePipelineModeParameters() {
         error("--run_bullseye requires alignment outputs. Please disable --skip_alignment.")
     }
 
-    if (params.run_bullseye && !params.bullseye_mock && !params.bullseye_annotation_file) {
-        error("--run_bullseye requires --bullseye_annotation_file unless --bullseye_mock is enabled")
+    if (params.run_bullseye && !params.bullseye_mock && !params.annotation_reFlat_file && !params.gtf) {
+        error("--run_bullseye requires either --annotation_reFlat_file or --gtf unless --bullseye_mock is enabled")
     }
 
     if (params.run_bullseye && !params.bullseye_mock && !params.bullseye_code_dir) {

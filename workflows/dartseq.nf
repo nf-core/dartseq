@@ -16,6 +16,7 @@ include { SAMTOOLS_INDEX         } from '../modules/nf-core/samtools/index/main'
 include { MULTIQC                } from '../modules/nf-core/multiqc/main'
 include { RUSTQC                 } from '../modules/local/rustqc/main'
 include { BULLSEYE_PARSEBAM      } from '../modules/local/bullseye/parsebam/main'
+include { BULLSEYE_GTF2GENEPRED  } from '../modules/local/bullseye/gtf2genepred/main'
 include { BULLSEYE_FIND_EDIT_SITES } from '../modules/local/bullseye/findeditsites/main'
 include { BULLSEYE_SUMMARIZE_SITES } from '../modules/local/bullseye/summarizesites/main'
 include { BULLSEYE_QUANTIFY_SITES } from '../modules/local/bullseye/quantifysites/main'
@@ -43,6 +44,7 @@ workflow DARTSEQ {
     ch_multiqc_files = channel.empty()
     ch_trimmed_reads = ch_samplesheet
     ch_aligned_bam = channel.empty()
+    ch_gtf = channel.empty()
     //
     // MODULE: Run FastQC
     //
@@ -180,8 +182,16 @@ workflow DARTSEQ {
     //
     if (params.run_bullseye) {
         // Stage annotation into Bullseye tasks so it is always visible inside containers.
-        def bullseye_annotation_path = params.bullseye_mock ? "$projectDir/assets/bullseye.mock.refFlat" : params.bullseye_annotation_file
-        ch_bullseye_annotation = channel.value(file(bullseye_annotation_path, checkIfExists: true))
+        ch_bullseye_annotation = channel.empty()
+        if (params.bullseye_mock) {
+            ch_bullseye_annotation = channel.value(file("$projectDir/assets/bullseye.mock.refFlat", checkIfExists: true))
+        } else if (params.annotation_reFlat_file) {
+            ch_bullseye_annotation = channel.value(file(params.annotation_reFlat_file, checkIfExists: true))
+        } else {
+            BULLSEYE_GTF2GENEPRED ( ch_gtf )
+            ch_bullseye_annotation = BULLSEYE_GTF2GENEPRED.out.refFlat
+            ch_versions = ch_versions.mix(BULLSEYE_GTF2GENEPRED.out.versions.first())
+        }
 
         BULLSEYE_PARSEBAM ( ch_aligned_bam )
 

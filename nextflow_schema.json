@@ -260,7 +260,7 @@
                     "type": "string",
                     "description": "Optional container image URI or local SIF for Bullseye local modules."
                 },
-                "bullseye_annotation_file": {
+                "annotation_reFlat_file": {
                     "type": "string",
                     "description": "Annotation file for Find_edit_site.pl (refFlat or compatible).",
                     "format": "file-path"

@@ -18,7 +18,7 @@ nextflow_pipeline {
                 run_bullseye             = true
                 bullseye_container       = 'ghcr.io/nf-core/bullseye:0.1.1'
                 bullseye_code_dir        = '/opt/bullseye/Code'
-                bullseye_annotation_file = "$projectDir/assets/bullseye.test.refFlat"
+                annotation_reFlat_file   = "$projectDir/assets/bullseye.test.refFlat"
                 bullseye_control_group   = 'control'
 
                 bullseye_parse_min_coverage   = 1
@@ -79,7 +79,7 @@ nextflow_pipeline {
                 run_bullseye                 = true
                 bullseye_container           = 'ghcr.io/nf-core/bullseye:0.1.1'
                 bullseye_code_dir            = '/opt/bullseye/Code'
-                bullseye_annotation_file     = "$projectDir/assets/bullseye.test.refFlat"
+                annotation_reFlat_file       = "$projectDir/assets/bullseye.test.refFlat"
                 bullseye_contrasts           = "$projectDir/assets/contrasts_test.csv"
 
                 bullseye_parse_min_coverage   = 1
