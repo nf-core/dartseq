@@ -5,7 +5,7 @@ process BULLSEYE_R_GLM {
     container params.bullseye_r_container ?: null
 
     input:
-    tuple val(meta), path(cov_tsv), path(mut_tsv), path(coldata_tsv)
+    tuple val(meta), path(cov_tsv), path(mut_tsv), path(observations_tsv)
 
     output:
     tuple val(meta), path("${prefix}.glm.tsv"), emit: tsv
@@ -42,18 +42,18 @@ EOF
 
         cov <- fread("${cov_tsv}")
         mut <- fread("${mut_tsv}")
-        coldata <- fread("${coldata_tsv}")
+        observations <- fread("${observations_tsv}")
 
-        if (!"sample" %in% colnames(coldata)) {
-            stop("coldata must contain a 'sample' column")
+        if (!"sample" %in% colnames(observations)) {
+            stop("observations must contain a 'sample' column")
         }
 
-        rownames(coldata) <- coldata\$sample
+        rownames(observations) <- observations\$sample
 
         result <- Bullseye(
             data_cov = as.data.frame(cov),
             data_mut = as.data.frame(mut),
-            colData = as.data.frame(coldata),
+            colData = as.data.frame(observations),
             design = as.formula("${params.bullseye_glm_design}"),
             min.cov = ${params.bullseye_glm_min_cov},
             return.df.only = TRUE,

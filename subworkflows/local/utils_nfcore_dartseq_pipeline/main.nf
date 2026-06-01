@@ -256,8 +256,8 @@ def validatePipelineModeParameters() {
         error("--run_bullseye_glm requires --bullseye_functions_r_file unless --bullseye_glm_mock is enabled")
     }
 
-    if (params.run_bullseye_glm && !params.bullseye_glm_coldata_file) {
-        error("--run_bullseye_glm requires --bullseye_glm_coldata_file")
+    if (params.run_bullseye_glm && !params.bullseye_glm_observations) {
+        error("--run_bullseye_glm requires --bullseye_glm_observations")
     }
 
     if (params.run_rustqc && params.skip_alignment) {
