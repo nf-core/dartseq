@@ -230,33 +230,33 @@ workflow DARTSEQ {
                             return [ contrast, meta, matrix, tbi ]
                         other: true
                 }
-            
+
             // Group edited and control samples per contrast
             ch_bullseye_edited_per_contrast = ch_bullseye_pairs.edited
-                .map { contrast, meta, matrix, tbi -> 
-                    [ contrast.contrast_id, contrast, meta, matrix, tbi ] 
+                .map { contrast, meta, matrix, tbi ->
+                    [ contrast.contrast_id, contrast, meta, matrix, tbi ]
                 }
                 .groupTuple()
-            
+
             ch_bullseye_control_per_contrast = ch_bullseye_pairs.control
-                .map { contrast, meta, matrix, tbi -> 
-                    [ contrast.contrast_id, contrast, meta, matrix, tbi ] 
+                .map { contrast, meta, matrix, tbi ->
+                    [ contrast.contrast_id, contrast, meta, matrix, tbi ]
                 }
                 .groupTuple()
 
             // Join and create all pairs within each contrast
             ch_bullseye_pairs = ch_bullseye_edited_per_contrast
                 .join(ch_bullseye_control_per_contrast)
-                .flatMap { _contrast_id, contrast_list, edited_meta_list, edited_matrix_list, edited_tbi_list, 
+                .flatMap { _contrast_id, contrast_list, edited_meta_list, edited_matrix_list, edited_tbi_list,
                            _contrast_list2, control_meta_list, control_matrix_list, control_tbi_list ->
                     def contrast = contrast_list[0]  // All entries have same contrast info
                     def pairs = []
                     edited_meta_list.eachWithIndex { edited_meta, ei ->
                         control_meta_list.eachWithIndex { control_meta, ci ->
                             // Enrich meta with contrast info
-                            def enriched_meta = edited_meta + [ 
+                            def enriched_meta = edited_meta + [
                                 contrast_id: contrast.contrast_id,
-                                contrast_mode: contrast.mode 
+                                contrast_mode: contrast.mode
                             ]
                             pairs << [
                                 enriched_meta,
