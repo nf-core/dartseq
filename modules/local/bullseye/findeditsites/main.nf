@@ -22,9 +22,9 @@ process BULLSEYE_FIND_EDIT_SITES {
     def fold_threshold = contrast.fold_threshold ?: params.bullseye_edit_fold_threshold
     def min_sites = contrast.min_sites ?: params.bullseye_min_edit_sites
     def contrast_id = meta.contrast_id ?: 'default'
-    
+
     prefix = task.ext.prefix ?: "${meta.id}.vs.${control_meta.id}.${contrast_id}"
-    
+
     if (params.bullseye_mock) {
         """
         cat > ${prefix}.bed << 'EOF'

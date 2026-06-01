@@ -36,7 +36,7 @@ Workflow overview:
 4. Build or use provided aligner references (STAR or HISAT2).
 5. Align reads and produce sorted BAM files plus index files.
 6. Run optional Bullseye editing analysis:
-  parse BAM, summarize sites, quantify edits, compare against controls, and optionally RAC filter / gather sites / GLM.
+   parse BAM, summarize sites, quantify edits, compare against controls, and optionally RAC filter / gather sites / GLM.
 7. Run optional RustQC summaries on alignments.
 8. Aggregate run-wide summaries and software versions with [MultiQC](http://multiqc.info/).
 

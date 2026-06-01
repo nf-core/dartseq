@@ -39,7 +39,7 @@ nextflow_pipeline {
             def a04_bai = file("$outputDir/hisat2/A04/A04.sorted.bam.bai")
             def c03_bai = file("$outputDir/hisat2/C03/C03.sorted.bam.bai")
             def e01_bai = file("$outputDir/hisat2/E01/E01.sorted.bam.bai")
-            
+
             // stable_name: All files + folders in ${params.outdir}/ with a stable name
             def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignore: ['pipeline_info/*.{html,json,txt}'])
             // stable_path: All files in ${params.outdir}/ with stable content
