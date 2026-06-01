@@ -358,12 +358,12 @@ workflow DARTSEQ {
             BULLSEYE_GATHER_SITES ( ch_bullseye_gather_input )
 
             if (params.run_bullseye_glm) {
-                ch_bullseye_glm_coldata = channel.value(file(params.bullseye_glm_coldata_file, checkIfExists: true))
+                ch_bullseye_glm_observations = channel.value(file(params.bullseye_glm_observations, checkIfExists: true))
 
                 ch_bullseye_glm_input = BULLSEYE_GATHER_SITES.out.coverage
                     .join(BULLSEYE_GATHER_SITES.out.mut)
-                    .combine(ch_bullseye_glm_coldata)
-                    .map { meta, cov, mut, coldata -> [ meta, cov, mut, coldata ] }
+                    .combine(ch_bullseye_glm_observations)
+                    .map { meta, cov, mut, observations -> [ meta, cov, mut, observations ] }
 
                 BULLSEYE_R_GLM ( ch_bullseye_glm_input )
             }

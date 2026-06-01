@@ -375,9 +375,9 @@
                     "format": "file-path",
                     "default": "/opt/bullseye/example_data/markdown/functions.R"
                 },
-                "bullseye_glm_coldata_file": {
+                "bullseye_glm_observations": {
                     "type": "string",
-                    "description": "Path to a tab-delimited sample metadata file containing at least a 'sample' column.",
+                    "description": "Path to a tab-delimited observations file containing sample metadata with at least a 'sample' column (consistent with nf-core/differentialabundance).",
                     "format": "file-path"
                 },
                 "bullseye_glm_design": {
