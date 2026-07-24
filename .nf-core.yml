@@ -1,17 +1,17 @@
+lint:
+  nfcore_components: false
+  pipeline_todos: false
+  readme: false
+nf_core_version: 4.0.3
 repository_type: pipeline
-
-nf_core_version: 3.5.2
-
-lint: {}
-
 template:
-  org: nf-core
-  name: dartseq
-  description: Pipeline for m6A detection in RNAseq data
   author: Mathieu Flamand, Olga Brovkina, Joana Pimenta Bernardes, Fatemeh Nasehi
-  version: 1.0.0dev
-  force: true
+  description: Pipeline for m6A detection in RNAseq data
+  force: false
+  is_nfcore: true
+  name: dartseq
+  org: nf-core
   outdir: .
   skip_features:
     - gpu
-  is_nfcore: true
+  version: 1.0.0dev
