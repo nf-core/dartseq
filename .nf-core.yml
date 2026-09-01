@@ -1,8 +1,13 @@
 lint:
+  files_exist:
+    - .github/workflows/linting_comment.yml
+  files_unchanged:
+    - .github/workflows/branch.yml
+    - .github/workflows/linting.yml
   nfcore_components: false
   pipeline_todos: false
   readme: false
-nf_core_version: 4.0.3
+nf_core_version: 4.1.0
 repository_type: pipeline
 template:
   author: Mathieu Flamand, Olga Brovkina, Joana Pimenta Bernardes, Fatemeh Nasehi
