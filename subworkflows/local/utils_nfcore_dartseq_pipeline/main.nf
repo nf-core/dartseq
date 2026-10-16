@@ -105,32 +105,36 @@ workflow PIPELINE_INITIALISATION {
 
     //
     // Create channel from input file provided through params.input
+    // (absent when starting from matrices via --bullseye_glm_coverage/--bullseye_glm_mut)
     //
-
-    channel
-        .fromList(samplesheetToList(input, "${projectDir}/assets/schema_input.json"))
-        .map {
-            row ->
-                def meta = row[0]
-                def fastq_1 = row.size() > 1 ? row[1] : null
-                def fastq_2 = row.size() > 2 ? row[2] : null
-                def group = row.size() > 3 ? row[3] : null
-                def meta_with_group = group ? meta + [ group: group ] : meta
-                if (!fastq_2) {
-                    return [ meta.id, meta_with_group + [ single_end:true ], [ fastq_1 ] ]
-                } else {
-                    return [ meta.id, meta_with_group + [ single_end:false ], [ fastq_1, fastq_2 ] ]
-                }
-        }
-        .groupTuple()
-        .map { samplesheet ->
-            validateInputSamplesheet(samplesheet)
-        }
-        .map {
-            meta, fastqs ->
-                return [ meta, fastqs.flatten() ]
-        }
-        .set { ch_samplesheet }
+    if (!input) {
+        ch_samplesheet = channel.empty()
+    } else {
+        channel
+            .fromList(samplesheetToList(input, "${projectDir}/assets/schema_input.json"))
+            .map {
+                row ->
+                    def meta = row[0]
+                    def fastq_1 = row.size() > 1 ? row[1] : null
+                    def fastq_2 = row.size() > 2 ? row[2] : null
+                    def group = row.size() > 3 ? row[3] : null
+                    def meta_with_group = group ? meta + [ group: group ] : meta
+                    if (!fastq_2) {
+                        return [ meta.id, meta_with_group + [ single_end:true ], [ fastq_1 ] ]
+                    } else {
+                        return [ meta.id, meta_with_group + [ single_end:false ], [ fastq_1, fastq_2 ] ]
+                    }
+            }
+            .groupTuple()
+            .map { samplesheet ->
+                validateInputSamplesheet(samplesheet)
+            }
+            .map {
+                meta, fastqs ->
+                    return [ meta, fastqs.flatten() ]
+            }
+            .set { ch_samplesheet }
+    }
 
     emit:
     samplesheet = ch_samplesheet
@@ -195,7 +199,35 @@ def validateInputParameters() {
     validatePipelineModeParameters()
 }
 
+//
+// True when the pipeline starts from coverage/mutation matrices instead of FASTQs
+//
+def isGlmMatrixMode() {
+    return params.bullseye_glm_coverage || params.bullseye_glm_mut
+}
+
 def validatePipelineModeParameters() {
+    if (isGlmMatrixMode()) {
+        if (!params.bullseye_glm_coverage || !params.bullseye_glm_mut) {
+            error("Starting from matrices requires both --bullseye_glm_coverage and --bullseye_glm_mut")
+        }
+        if (!params.bullseye_glm_observations) {
+            error("Starting from matrices requires --bullseye_glm_observations")
+        }
+        if (params.input) {
+            error("Use either --input (start from FASTQs) or --bullseye_glm_coverage/--bullseye_glm_mut (start from matrices), not both")
+        }
+        if (!params.bullseye_glm_mock && !params.bullseye_functions_r_file) {
+            error("Starting from matrices requires --bullseye_functions_r_file unless --bullseye_glm_mock is enabled")
+        }
+        // FASTQ, alignment and Bullseye site-calling checks below do not apply
+        return
+    }
+
+    if (!params.input) {
+        error("--input is required unless starting from matrices (--bullseye_glm_coverage, --bullseye_glm_mut, --bullseye_glm_observations)")
+    }
+
     def allowed_trimmers = ['none', 'fastp', 'trimgalore']
     if (!allowed_trimmers.contains(params.trimmer as String)) {
         error("Invalid --trimmer '${params.trimmer}'. Allowed values: ${allowed_trimmers.join(', ')}")

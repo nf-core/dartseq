@@ -122,6 +122,7 @@
                 "multiqc/multiqc_plots/pdf/fastp-seq-quality-plot_Read_2_Before_filtering.pdf",
                 "multiqc/multiqc_plots/pdf/fastp_filtered_reads_plot-cnt.pdf",
                 "multiqc/multiqc_plots/pdf/fastp_filtered_reads_plot-pct.pdf",
+                "multiqc/multiqc_plots/pdf/fastqc-status-check-heatmap.pdf",
                 "multiqc/multiqc_plots/pdf/fastqc_adapter_content_plot.pdf",
                 "multiqc/multiqc_plots/pdf/fastqc_per_base_n_content_plot.pdf",
                 "multiqc/multiqc_plots/pdf/fastqc_per_base_sequence_quality_plot.pdf",
@@ -152,6 +153,7 @@
                 "multiqc/multiqc_plots/png/fastp-seq-quality-plot_Read_2_Before_filtering.png",
                 "multiqc/multiqc_plots/png/fastp_filtered_reads_plot-cnt.png",
                 "multiqc/multiqc_plots/png/fastp_filtered_reads_plot-pct.png",
+                "multiqc/multiqc_plots/png/fastqc-status-check-heatmap.png",
                 "multiqc/multiqc_plots/png/fastqc_adapter_content_plot.png",
                 "multiqc/multiqc_plots/png/fastqc_per_base_n_content_plot.png",
                 "multiqc/multiqc_plots/png/fastqc_per_base_sequence_quality_plot.png",
@@ -182,6 +184,7 @@
                 "multiqc/multiqc_plots/svg/fastp-seq-quality-plot_Read_2_Before_filtering.svg",
                 "multiqc/multiqc_plots/svg/fastp_filtered_reads_plot-cnt.svg",
                 "multiqc/multiqc_plots/svg/fastp_filtered_reads_plot-pct.svg",
+                "multiqc/multiqc_plots/svg/fastqc-status-check-heatmap.svg",
                 "multiqc/multiqc_plots/svg/fastqc_adapter_content_plot.svg",
                 "multiqc/multiqc_plots/svg/fastqc_per_base_n_content_plot.svg",
                 "multiqc/multiqc_plots/svg/fastqc_per_base_sequence_quality_plot.svg",
@@ -281,7 +284,6 @@
                 "multiqc_citations.txt:md5,82c33232e4cf9c9bd5b091b8823a95ba",
                 "multiqc_fastp.txt:md5,b3a22a6af78e4823862463843a9b50bb",
                 "multiqc_fastqc.txt:md5,59bd321a789525442fa7f883dc77476d",
-                "multiqc_general_stats.txt:md5,e534377f46cef8d2a9e4054e126e5fa6",
                 "multiqc_star.txt:md5,f0a3b5ad6defbc1835a4158449c3375d",
                 "star_alignment_plot.txt:md5,5d1f33f196fbff82cb91141b51a7b602",
                 "star_summary_table.txt:md5,5276d0bf6e4b924a595d5c77bb7a2b2b",
@@ -306,7 +308,7 @@
                 "transcriptInfo.tab:md5,0c7fcb2282ec5d5dde590170dc0ccad2"
             ]
         ],
-        "timestamp": "2026-08-27T15:19:55.463658402",
+        "timestamp": "2026-10-15T17:44:30.09781082",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.4"

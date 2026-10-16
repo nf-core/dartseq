@@ -157,6 +157,7 @@
                 "multiqc/multiqc_plots/pdf/fastp-seq-quality-plot_Read_2_Before_filtering.pdf",
                 "multiqc/multiqc_plots/pdf/fastp_filtered_reads_plot-cnt.pdf",
                 "multiqc/multiqc_plots/pdf/fastp_filtered_reads_plot-pct.pdf",
+                "multiqc/multiqc_plots/pdf/fastqc-status-check-heatmap.pdf",
                 "multiqc/multiqc_plots/pdf/fastqc_adapter_content_plot.pdf",
                 "multiqc/multiqc_plots/pdf/fastqc_per_base_n_content_plot.pdf",
                 "multiqc/multiqc_plots/pdf/fastqc_per_base_sequence_quality_plot.pdf",
@@ -186,6 +187,7 @@
                 "multiqc/multiqc_plots/png/fastp-seq-quality-plot_Read_2_Before_filtering.png",
                 "multiqc/multiqc_plots/png/fastp_filtered_reads_plot-cnt.png",
                 "multiqc/multiqc_plots/png/fastp_filtered_reads_plot-pct.png",
+                "multiqc/multiqc_plots/png/fastqc-status-check-heatmap.png",
                 "multiqc/multiqc_plots/png/fastqc_adapter_content_plot.png",
                 "multiqc/multiqc_plots/png/fastqc_per_base_n_content_plot.png",
                 "multiqc/multiqc_plots/png/fastqc_per_base_sequence_quality_plot.png",
@@ -215,6 +217,7 @@
                 "multiqc/multiqc_plots/svg/fastp-seq-quality-plot_Read_2_Before_filtering.svg",
                 "multiqc/multiqc_plots/svg/fastp_filtered_reads_plot-cnt.svg",
                 "multiqc/multiqc_plots/svg/fastp_filtered_reads_plot-pct.svg",
+                "multiqc/multiqc_plots/svg/fastqc-status-check-heatmap.svg",
                 "multiqc/multiqc_plots/svg/fastqc_adapter_content_plot.svg",
                 "multiqc/multiqc_plots/svg/fastqc_per_base_n_content_plot.svg",
                 "multiqc/multiqc_plots/svg/fastqc_per_base_sequence_quality_plot.svg",
@@ -239,16 +242,16 @@
                 "C03_R2.fastp.fastq.gz:md5,c769cf8194ff77beb89b7b76e887fc1f",
                 "E01_R1.fastp.fastq.gz:md5,05622c00202e7e40427282ea160ed76b",
                 "E01_R2.fastp.fastq.gz:md5,d5a4030c39f4828d8dcc0207b63f3ef9",
-                "genes.splice_sites.txt:md5,d41d8cd98f00b204e9800998ecf8427e",
-                "genome.1.ht2:md5,677457139b78b3d6dc274c692ef590fc",
-                "genome.2.ht2:md5,9e445813da93a75bcb645423e5ef15f1",
+                "genes.splice_sites.txt:md5,663a2a31fdce445391baa883ab36b3c4",
+                "genome.1.ht2:md5,8381ffd794381ab61024472080e6c0c6",
+                "genome.2.ht2:md5,6072333ef15ad9882e2f404e5aaf204e",
                 "genome.3.ht2:md5,64c0dc18e0aeff5f8f2bc88fb9b62a1e",
                 "genome.4.ht2:md5,a8b60ad8b75a2b55048a8d43b244bfe0",
-                "genome.5.ht2:md5,3ec4ea5117a172a06624a05eb4e0aa46",
-                "genome.6.ht2:md5,580f776c05ea1453ed9ed03d36fea088",
-                "genome.7.ht2:md5,9013eccd91ad614d7893c739275a394f",
-                "genome.8.ht2:md5,33cdeccccebe80329f1fdbee7f5874cb",
-                "bowtie2_pe_plot.txt:md5,0e7cc4bb44bc060cd494aee190b8fcd0",
+                "genome.5.ht2:md5,36ba6deff23e9c9752e398e3644fd47e",
+                "genome.6.ht2:md5,f61dc803c8c4375bb5aa35ef1a198029",
+                "genome.7.ht2:md5,860d0d8dd83e1b12b22e463cf943768a",
+                "genome.8.ht2:md5,83709f23e03cb27c0e7862fceef84b1d",
+                "bowtie2_pe_plot.txt:md5,063b55b31ebf469c3818705f2e2dfa86",
                 "fastp-insert-size-plot.txt:md5,2f46872417579e6d2e7e3706b58644c7",
                 "fastp-seq-content-gc-plot_Read_1_After_filtering.txt:md5,88df0d74c80ff76be0ecddc01629b085",
                 "fastp-seq-content-gc-plot_Read_1_Before_filtering.txt:md5,4aae9fa97b0c261a9708fa01d79d4ee1",
@@ -273,17 +276,16 @@
                 "fastqc_sequence_counts_plot.txt:md5,09c716d9ecb1a35a833f0e885e128895",
                 "fastqc_sequence_duplication_levels_plot.txt:md5,cc770a271a86aa87b70b1d93e7b00519",
                 "fastqc_sequence_length_distribution_plot.txt:md5,1424180eda58c91665865e87f0bfc5e8",
-                "multiqc_bowtie2.txt:md5,f3784f4207eba4a10f254cf0b0865a4e",
+                "multiqc_bowtie2.txt:md5,c9eb0fe8bf6dce9583eaf735541d83cc",
                 "multiqc_citations.txt:md5,3b51827bd47588e5bf9cf03d4f41d817",
                 "multiqc_fastp.txt:md5,b3a22a6af78e4823862463843a9b50bb",
-                "multiqc_fastqc.txt:md5,59bd321a789525442fa7f883dc77476d",
-                "multiqc_general_stats.txt:md5,c238c62dad91e89ba9c68a8752b5c28a"
+                "multiqc_fastqc.txt:md5,59bd321a789525442fa7f883dc77476d"
             ]
         ],
+        "timestamp": "2026-10-16T14:21:20.328308635",
         "meta": {
-            "nf-test": "0.9.3",
+            "nf-test": "0.9.5",
             "nextflow": "26.04.4"
-        },
-        "timestamp": "2026-08-20T10:14:42.607071502"
+        }
     }
 }

@@ -27,6 +27,7 @@ include { paramsSummaryMap       } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_dartseq_pipeline'
+include { isGlmMatrixMode        } from '../subworkflows/local/utils_nfcore_dartseq_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -50,6 +51,12 @@ workflow DARTSEQ {
     def ch_trimmed_reads = ch_samplesheet
     def ch_aligned_bam = channel.empty()
     def ch_gtf = channel.empty()
+    // [ meta, coverage, mut ] matrices for BULLSEYE_R_GLM: from BULLSEYE_GATHER_SITES
+    // when starting from FASTQs, or from --bullseye_glm_coverage/--bullseye_glm_mut
+    def ch_bullseye_glm_matrices = channel.empty()
+    // Starting from matrices: ch_samplesheet is empty, so FastQC/trimming run no
+    // tasks, and alignment and Bullseye site calling are skipped below.
+    def glm_matrix_mode = isGlmMatrixMode()
     //
     // MODULE: Run FastQC
     //
@@ -86,7 +93,7 @@ workflow DARTSEQ {
     //
     ch_sorted_bam = channel.empty()
 
-    if (!params.skip_alignment) {
+    if (!params.skip_alignment && !glm_matrix_mode) {
         ch_fasta = params.fasta ? Channel.value([ [ id: 'fasta' ], file(params.fasta, checkIfExists: true) ]) : channel.empty()
         ch_gtf = params.gtf ? Channel.value([ [ id: 'gtf' ], file(params.gtf, checkIfExists: true) ]) : channel.empty()
 
@@ -188,7 +195,7 @@ workflow DARTSEQ {
     //
     // Optional Bullseye steps
     //
-    if (!params.skip_bullseye) {
+    if (!params.skip_bullseye && !glm_matrix_mode) {
         // Stage annotation into Bullseye tasks so it is always visible inside containers.
         ch_bullseye_annotation = channel.empty()
         if (params.bullseye_mock) {
@@ -393,24 +400,40 @@ workflow DARTSEQ {
             )
 
             if (!params.skip_bullseye_glm) {
-                ch_bullseye_glm_observations = channel.value(file(params.bullseye_glm_observations, checkIfExists: true))
-                ch_bullseye_glm_functions_r_file = channel.value(file(params.bullseye_functions_r_file, checkIfExists: true))
-
-                ch_bullseye_glm_input = BULLSEYE_GATHER_SITES.out.coverage
+                ch_bullseye_glm_matrices = BULLSEYE_GATHER_SITES.out.coverage
                     .join(BULLSEYE_GATHER_SITES.out.mut)
-                    .combine(ch_bullseye_glm_observations)
-                    .map { meta, cov, mut, observations -> [ meta, cov, mut, observations ] }
-
-                BULLSEYE_R_GLM (
-                    ch_bullseye_glm_input,
-                    params.bullseye_glm_mock,
-                    ch_bullseye_glm_functions_r_file,
-                    params.bullseye_glm_design,
-                    params.bullseye_glm_min_cov,
-                    params.bullseye_glm_link
-                )
             }
         }
+    }
+
+    //
+    // Optional Bullseye GLM (differential editing) - on gathered matrices, or
+    // directly on user-provided matrices (--bullseye_glm_coverage/--bullseye_glm_mut)
+    //
+    if (glm_matrix_mode) {
+        ch_bullseye_glm_matrices = channel.value([
+            [ id: 'glm_matrix' ],
+            file(params.bullseye_glm_coverage, checkIfExists: true),
+            file(params.bullseye_glm_mut, checkIfExists: true)
+        ])
+    }
+
+    if (glm_matrix_mode || !params.skip_bullseye_glm) {
+        ch_bullseye_glm_observations = channel.value(file(params.bullseye_glm_observations, checkIfExists: true))
+        ch_bullseye_glm_functions_r_file = channel.value(file(params.bullseye_functions_r_file, checkIfExists: true))
+
+        ch_bullseye_glm_input = ch_bullseye_glm_matrices
+            .combine(ch_bullseye_glm_observations)
+            .map { meta, cov, mut, observations -> [ meta, cov, mut, observations ] }
+
+        BULLSEYE_R_GLM (
+            ch_bullseye_glm_input,
+            params.bullseye_glm_mock,
+            ch_bullseye_glm_functions_r_file,
+            params.bullseye_glm_design,
+            params.bullseye_glm_min_cov,
+            params.bullseye_glm_link
+        )
     }
 
     //

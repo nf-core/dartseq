@@ -189,7 +189,7 @@ sample4.bullseye.RAC	control
 - `--bullseye_glm_link` (default `betabin`): the GLM family - `betabin` (beta-binomial, recommended for most editing data), `bin` (binomial), `quasibinomial`, or `betareg`.
 - `--bullseye_glm_min_cov` (default `10`): sites with coverage below this threshold (per sample) are zeroed out before fitting.
 
-The design's grouping column needs at least two levels with residual degrees of freedom left over once fit (e.g. comparing a single group against itself, or too few samples per level, yields `NA` p-values rather than an error - this is expected model behaviour, not a pipeline failure).
+The design's grouping column needs at least two groups (the GLM stops with an error otherwise); too few samples per group can still yield `NA` p-values for individual sites. Groups are compared against the first group in alphabetical order, and results are reported as `<group>_pvalue` and `<group>_log2FoldChange` per site. Group labels must not occur inside other group or sample names (e.g. groups `k` and `kd`), because Bullseye assigns samples to groups by matching the label.
 
 ### Usage
 
@@ -204,6 +204,21 @@ nextflow run nf-core/dartseq \
   --bullseye_glm_link betabin \
   ...
 ```
+
+### Starting from matrices
+
+If you already have per-site coverage and mutation-count matrices (e.g. from an earlier run, or with additional samples quantified at the same sites), you can run only the GLM. FASTQ processing, alignment and Bullseye site calling are skipped, and `--input` is not needed:
+
+```bash
+nextflow run nf-core/dartseq \
+  --bullseye_glm_coverage coverage.txt \
+  --bullseye_glm_mut mut.txt \
+  --bullseye_glm_observations observations.tsv \
+  --bullseye_glm_design '~group' \
+  --outdir <OUTDIR>
+```
+
+Both matrices use the `BULLSEYE_GATHER_SITES` format: tab-delimited, columns `#chr`, `start`, `end`, `cluster`, `strand`, then one column per sample, with identical rows and columns in both files. Every `sample` in the observations file must be a matrix column; extra matrix columns are ignored. Results are written to `bullseye/glm_matrix/glm_matrix.bullseye.glm.tsv`.
 
 ### Updating the pipeline
 

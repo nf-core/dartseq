@@ -10,7 +10,7 @@
             "type": "object",
             "fa_icon": "fas fa-terminal",
             "description": "Define where the pipeline should find input data and save output data.",
-            "required": ["input", "outdir"],
+            "required": ["outdir"],
             "properties": {
                 "input": {
                     "type": "string",
@@ -372,6 +372,18 @@
                     "type": "string",
                     "description": "Path to a tab-delimited observations file containing sample metadata with at least a 'sample' column (consistent with nf-core/differentialabundance).",
                     "format": "file-path"
+                },
+                "bullseye_glm_coverage": {
+                    "type": "string",
+                    "description": "Start from matrices: tab-delimited per-site coverage matrix (BULLSEYE_GATHER_SITES format: #chr, start, end, cluster, strand, then one column per sample). Requires --bullseye_glm_mut and --bullseye_glm_observations; skips FASTQ processing, alignment and Bullseye site calling, so --input is not needed.",
+                    "format": "file-path",
+                    "exists": true
+                },
+                "bullseye_glm_mut": {
+                    "type": "string",
+                    "description": "Start from matrices: tab-delimited per-site mutation-count matrix matching --bullseye_glm_coverage (same rows and sample columns).",
+                    "format": "file-path",
+                    "exists": true
                 },
                 "bullseye_glm_design": {
                     "type": "string",

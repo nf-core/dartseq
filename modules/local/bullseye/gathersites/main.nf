@@ -81,9 +81,13 @@ BEGIN {
     }
     header = "#chr" OFS "start" OFS "end" OFS "cluster" OFS "strand"
     for (i = 1; i <= nsamples; i++) header = header OFS names[i]
-    if (outCoverage == "true") print header > covOut
-    if (outMutations == "true") print header > mutOut
-    if (outScore == "true") print header > scoreOut
+    # Body tmp files are otherwise only created lazily inside the END loop below,
+    # which never runs if zero sites are found across all samples - leaving sort
+    # with nothing to read. Touch them here so an all-empty result is a valid
+    # header-only file instead of a crash.
+    if (outCoverage == "true") { print header > covOut; printf "" > covBody }
+    if (outMutations == "true") { print header > mutOut; printf "" > mutBody }
+    if (outScore == "true") { print header > scoreOut; printf "" > scoreBody }
 }
 FNR == 1 { curIdx = fileIdx[FILENAME] }
 /^#/ { next }
