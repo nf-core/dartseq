@@ -86,7 +86,7 @@ EOF
         fit <- eBayes(fit)
         limmaScores <- topTable(fit, coef = colnames(fit\$coefficients)[2], number = Inf)
 
-        fwrite(as.data.table(result), file = "${prefix}.limma.tsv", sep = "\t")
+        fwrite(as.data.table(limmaScores), file = "${prefix}.limma.tsv", sep = "\t")
         EOF
 
         Rscript run_bullseye_limma.R
