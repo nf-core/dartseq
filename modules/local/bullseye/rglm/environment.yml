@@ -1,0 +1,13 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/environment-schema.json
+channels:
+  - conda-forge
+  - bioconda
+
+dependencies:
+  - conda-forge::r-base
+  - conda-forge::r-aod
+  - conda-forge::r-data.table
+  - conda-forge::r-dplyr
+  - conda-forge::r-tidyr
+  - conda-forge::r-tibble

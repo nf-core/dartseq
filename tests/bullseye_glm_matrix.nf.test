@@ -1,0 +1,103 @@
+nextflow_pipeline {
+
+    name "Bullseye GLM from matrices test"
+    script "../main.nf"
+    tag "pipeline_bullseye_glm_matrix"
+    // nf-test 0.9.5 does not reliably apply a suite-level profile to
+    // nextflow_pipeline tests, so the params below are the source of truth.
+    profile "test_bullseye_glm_matrix"
+
+    test("Bullseye GLM on real chr19 matrices - 3 wt vs 3 kd, no --input") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+                // nf-test's global default profile "test" (nf-test.config) is applied
+                // alongside this suite's "test_bullseye_glm_matrix" profile, and
+                // conf/test.config sets --input. Null it out so the pipeline-mode
+                // validation ("not both") doesn't reject this matrix-mode run.
+                input = null
+                // URLs spelled out: params.pipelines_testdata_base_path is not yet
+                // resolved when nf-test evaluates this block.
+                bullseye_glm_coverage     = 'https://raw.githubusercontent.com/nf-core/test-datasets/dartseq/data/dartseq/glm/coverage.txt'
+                bullseye_glm_mut          = 'https://raw.githubusercontent.com/nf-core/test-datasets/dartseq/data/dartseq/glm/mut.txt'
+                bullseye_glm_observations = 'https://raw.githubusercontent.com/nf-core/test-datasets/dartseq/data/dartseq/glm/observations.tsv'
+                bullseye_glm_design       = '~group'
+            }
+        }
+
+        then {
+            def glmTsv = file("$outputDir/bullseye/glm_matrix/glm_matrix.bullseye.glm.tsv")
+            def glmLines = glmTsv.exists() ? glmTsv.readLines() : []
+            def glmHeader = glmLines ? glmLines[0].tokenize('\t') : []
+
+            // stable_name: All files + folders in ${params.outdir}/ with a stable name
+            def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignore: ['pipeline_info/*.{html,json,txt}'])
+            // stable_path: All files in ${params.outdir}/ with stable content
+            def stable_path = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
+            // No output may be empty when starting from real matrices
+            def emptyFileChecks = getAllFilesFromDir(params.outdir, relative: false, includeDir: false)
+                .collect { f -> { -> assert f.size() > 0 : "Empty output file: ${f}" } }
+            assertAll(
+                [
+                    { assert workflow.success },
+                    // Starting from matrices: no FASTQ processing, alignment or site calling
+                    { assert !workflow.trace.tasks().any { it.name =~ /FASTQC|FASTP|STAR|HISAT2|BULLSEYE_(PARSEBAM|FIND|QUANT|GATHER)/ } },
+                    { assert glmTsv.exists() },
+                    { assert glmHeader.contains('site') },
+                    // The fixture coverage.txt/mut.txt have one fixed, known row count (373
+                    // lines = header + 372 sites). The GLM is per-site, so row count must match
+                    // exactly - catches sites silently dropped or duplicated by Bullseye().
+                    { assert glmLines.size() - 1 == 372 : "Expected 372 sites (one per coverage.txt row), got ${glmLines.size() - 1}" },
+                    // Groups are compared against the first level (alphabetical: kd), so the
+                    // wt comparison columns must exist and carry at least one real p-value.
+                    // (betabin link: Bullseye reports the fold change as <level>_log2FoldChange;
+                    // glm_comp_bbn() returns no <level>_LFC.)
+                    { assert glmHeader.containsAll(['wt_pvalue', 'wt_log2FoldChange']) : "Missing wt comparison columns: ${glmHeader}" },
+                    // Exact p-value/log2FC bytes aren't pinned (aod::betabin's matrix ops are
+                    // not bit-reproducible across CPU microarchitectures - see glm_matrix.bullseye.glm.tsv
+                    // in tests/.nftignore), so check the statistics are *valid*, not *identical*:
+                    // every non-NA p-value is a real probability, every non-NA log2FC is finite,
+                    // and not everything collapsed to NA.
+                    //
+                    // split('\t', -1) (not tokenize, which silently drops empty fields like
+                    // StringTokenizer) because data.table::fwrite() writes R's NA as a blank
+                    // field, not the text "NA" - tokenize() would shift every later column on
+                    // any row with a missing value, misreading a neighbouring column as this one.
+                    { ->
+                        def idx = glmHeader.indexOf('wt_pvalue')
+                        def pvals = glmLines.drop(1).collect { it.split('\t', -1)[idx] }.findAll { it }.collect { it as Double }
+                        assert pvals.size() > 0 : "All wt p-values are NA"
+                        // NaN (distinct from blank/missing, already excluded above) is itself
+                        // invalid and checked explicitly - it's always false against <, > so it
+                        // would otherwise silently pass the range check below.
+                        assert pvals.every { !it.isNaN() } : "NaN wt_pvalue found"
+                        def outOfRange = pvals.findAll { it < 0.0d || it > 1.0d }
+                        assert outOfRange.isEmpty() : "wt_pvalue outside [0,1]: ${outOfRange}"
+                    },
+                    { ->
+                        def idx = glmHeader.indexOf('wt_log2FoldChange')
+                        // wt_log2FoldChange = log2(wt_rate/kd_rate): +-Inf is legitimate (one group
+                        // has zero edited reads at the site - complete on/off editing), R writes it
+                        // as literal "Inf"/"-Inf" (Java's Double only parses "Infinity"). NaN (0/0,
+                        // both groups with no usable coverage) would indicate a real problem.
+                        def parseRDouble = { String s -> s == 'Inf' ? Double.POSITIVE_INFINITY : s == '-Inf' ? Double.NEGATIVE_INFINITY : s as Double }
+                        def lfcs = glmLines.drop(1).collect { it.split('\t', -1)[idx] }.findAll { it }.collect(parseRDouble)
+                        def nanValues = lfcs.findAll { Double.isNaN(it) }
+                        assert nanValues.isEmpty() : "NaN wt_log2FoldChange values (0/0 - a site that should have been filtered upstream)"
+                    },
+                    { assert snapshot(
+                        // Number of successful tasks
+                        workflow.trace.succeeded().size(),
+                        // pipeline versions.yml file for multiqc from which Nextflow version is removed because we test pipelines on multiple Nextflow versions
+                        removeNextflowVersion("$outputDir/pipeline_info/nf_core_dartseq_software_mqc_versions.yml"),
+                        // All stable path names, with a relative path
+                        stable_name,
+                        // All files with stable contents
+                        stable_path
+                    ).match() }
+                ] + emptyFileChecks as Closure[]
+            )
+        }
+    }
+}

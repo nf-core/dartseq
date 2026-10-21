@@ -26,10 +26,10 @@ include { getGenomeAttribute      } from './subworkflows/local/utils_nfcore_dart
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-// TODO nf-core: Remove this line if you don't need a FASTA file
-//   This is an example of how to use getGenomeAttribute() to fetch parameters
-//   from igenomes.config using `--genome`
+// Resolve reference defaults from genomes config when `--genome` is provided.
 params.fasta = getGenomeAttribute('fasta')
+params.star_index = params.star_index ?: getGenomeAttribute('star')
+params.gtf = params.gtf ?: getGenomeAttribute('gtf')
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -51,7 +51,11 @@ workflow NFCORE_DARTSEQ {
     // WORKFLOW: Run pipeline
     //
     DARTSEQ (
-        samplesheet
+        samplesheet,
+        params.multiqc_config,
+        params.multiqc_logo,
+        params.multiqc_methods_description,
+        params.outdir,
     )
     emit:
     multiqc_report = DARTSEQ.out.multiqc_report // channel: /path/to/multiqc_report.html
@@ -95,7 +99,6 @@ workflow {
         params.plaintext_email,
         params.outdir,
         params.monochrome_logs,
-        params.hook_url,
         NFCORE_DARTSEQ.out.multiqc_report
     )
 }
