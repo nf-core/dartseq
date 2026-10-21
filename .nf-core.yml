@@ -4,6 +4,9 @@ lint:
   files_unchanged:
     - .github/workflows/branch.yml
     - .github/workflows/linting.yml
+  nextflow_config:
+    - config_defaults:
+        - params.bullseye_functions_r_file
   nfcore_components: false
   pipeline_todos: false
   readme: false
@@ -19,4 +22,4 @@ template:
   outdir: .
   skip_features:
     - gpu
-  version: 1.0.0dev
+  version: 1.0.0
