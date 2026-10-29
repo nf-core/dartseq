@@ -10,7 +10,7 @@
             "type": "object",
             "fa_icon": "fas fa-terminal",
             "description": "Define where the pipeline should find input data and save output data.",
-            "required": ["input", "outdir"],
+            "required": ["outdir"],
             "properties": {
                 "input": {
                     "type": "string",
@@ -217,6 +217,220 @@
                     "description": "Suffix to add to the trace report filename. Default is the date and time in the format yyyy-MM-dd_HH-mm-ss.",
                     "hidden": true
                 },
+                "trimmer": {
+                    "type": "string",
+                    "description": "Read trimming tool to use.",
+                    "default": "fastp",
+                    "enum": ["none", "fastp", "trimgalore"]
+                },
+                "aligner": {
+                    "type": "string",
+                    "description": "Read aligner to use.",
+                    "default": "star",
+                    "enum": ["star", "hisat2"]
+                },
+                "skip_alignment": {
+                    "type": "boolean",
+                    "description": "Skip alignment stage (useful for smoke tests).",
+                    "default": false
+                },
+                "skip_bullseye": {
+                    "type": "boolean",
+                    "description": "Skip Bullseye downstream stage on aligned BAM files.",
+                    "default": true
+                },
+                "bullseye_mock": {
+                    "type": "boolean",
+                    "description": "Run Bullseye in mock mode without invoking Perl scripts.",
+                    "default": false
+                },
+                "annotation_reFlat_file": {
+                    "type": "string",
+                    "description": "Annotation file for Find_edit_sites.pl (refFlat or compatible).",
+                    "format": "file-path"
+                },
+                "bullseye_control_group": {
+                    "type": "string",
+                    "description": "Sample group label to use as control when pairing matrices for Bullseye (legacy mode, use bullseye_contrasts for explicit control).",
+                    "default": "control"
+                },
+                "bullseye_contrasts": {
+                    "type": "string",
+                    "description": "Path to CSV file defining specific Bullseye comparisons with per-contrast parameters. When provided, overrides bullseye_control_group. See assets/contrasts.csv for format.",
+                    "format": "file-path",
+                    "schema": "assets/schema_contrasts.json"
+                },
+                "bullseye_parse_min_coverage": {
+                    "type": "integer",
+                    "description": "Minimum coverage passed to parseBAM.pl.",
+                    "default": 10
+                },
+                "bullseye_edit_type": {
+                    "type": "string",
+                    "description": "Conversion type for Find_edit_site.pl (for example C2U).",
+                    "default": "C2U"
+                },
+                "bullseye_min_edit": {
+                    "type": "number",
+                    "description": "Minimum edit percentage for Find_edit_site.pl.",
+                    "default": 10
+                },
+                "bullseye_max_edit": {
+                    "type": "number",
+                    "description": "Maximum edit percentage for Find_edit_site.pl.",
+                    "default": 80
+                },
+                "bullseye_edit_fold_threshold": {
+                    "type": "number",
+                    "description": "Minimum edit fold threshold over control for Find_edit_site.pl.",
+                    "default": 1.5
+                },
+                "bullseye_min_edit_sites": {
+                    "type": "integer",
+                    "description": "Minimum number of edits to report a site.",
+                    "default": 2
+                },
+                "bullseye_edited_min_coverage": {
+                    "type": "integer",
+                    "description": "Minimum edited matrix coverage for Find_edit_site.pl.",
+                    "default": 10
+                },
+                "bullseye_control_min_coverage": {
+                    "type": "integer",
+                    "description": "Minimum control matrix coverage for Find_edit_site.pl.",
+                    "default": 10
+                },
+                "bullseye_replicates_min": {
+                    "type": "integer",
+                    "description": "Minimum replicate count used by summarize_sites.pl.",
+                    "default": 1
+                },
+                "bullseye_min_mut": {
+                    "type": "integer",
+                    "description": "Minimum number of mutations (edits) required at a site, summed across replicates, to keep it in summarize_sites.pl (--mut).",
+                    "default": 2
+                },
+                "bullseye_quant_coverage": {
+                    "type": "integer",
+                    "description": "Coverage threshold for quantify_sites.pl.",
+                    "default": 10
+                },
+                "skip_bullseye_racfilter": {
+                    "type": "boolean",
+                    "description": "Skip RAC motif filtering on Bullseye quantified BED files.",
+                    "help_text": "This only controls the strict canonical RAC motif requirement (a purine two bases upstream of the edited C). It has no effect on skip_bullseye_acfilter, which separately controls the AC motif check immediately upstream of it.",
+                    "default": true
+                },
+                "skip_bullseye_acfilter": {
+                    "type": "boolean",
+                    "description": "Propagate every candidate edited site downstream instead of only the strict canonical AC-motif subset.",
+                    "help_text": "BULLSEYE_ACFILTER always runs and always produces its AC.counts.tsv/all_sites*.bed diagnostics either way. This only controls which of its outputs (AC.bed, the strict subset, or all_sites.bed, every candidate site) propagates to downstream steps (RAC filtering, gathering, GLM). It's not yet confirmed whether APOBEC1-YTH edits occur only in the canonical A-before-C context, so set this if you want to keep non-canonical sites downstream.",
+                    "default": false
+                },
+                "bullseye_rac_remove_seq": {
+                    "type": "boolean",
+                    "description": "If true, remove RAC sequence column from RAC-filtered output BED.",
+                    "default": true
+                },
+                "skip_bullseye_gather_sites": {
+                    "type": "boolean",
+                    "description": "Skip aggregating Bullseye site-level outputs across samples using gather_scores.pl.",
+                    "default": true
+                },
+                "bullseye_gather_score": {
+                    "type": "boolean",
+                    "description": "Request score matrix output from gather_sites.pl.",
+                    "default": true
+                },
+                "bullseye_gather_coverage": {
+                    "type": "boolean",
+                    "description": "Request coverage matrix output from gather_sites.pl.",
+                    "default": true
+                },
+                "bullseye_gather_mutations": {
+                    "type": "boolean",
+                    "description": "Request mutation-count matrix output from gather_sites.pl.",
+                    "default": true
+                },
+                "skip_bullseye_glm": {
+                    "type": "boolean",
+                    "description": "Skip Bullseye R GLM helper on gathered coverage and mutation tables.",
+                    "default": true
+                },
+                "bullseye_glm_mock": {
+                    "type": "boolean",
+                    "description": "Run Bullseye GLM module in mock mode.",
+                    "default": false
+                },
+                "bullseye_functions_r_file": {
+                    "type": "string",
+                    "description": "Path to functions.R used by the Bullseye GLM helper.",
+                    "format": "file-path",
+                    "default": "assets/bullseye_functions.R"
+                },
+                "bullseye_glm_observations": {
+                    "type": "string",
+                    "description": "Path to a tab-delimited observations file containing sample metadata with at least a 'sample' column (consistent with nf-core/differentialabundance).",
+                    "format": "file-path"
+                },
+                "bullseye_glm_coverage": {
+                    "type": "string",
+                    "description": "Start from matrices: tab-delimited per-site coverage matrix (BULLSEYE_GATHER_SITES format: #chr, start, end, cluster, strand, then one column per sample). Requires --bullseye_glm_mut and --bullseye_glm_observations; skips FASTQ processing, alignment and Bullseye site calling, so --input is not needed.",
+                    "format": "file-path",
+                    "exists": true
+                },
+                "bullseye_glm_mut": {
+                    "type": "string",
+                    "description": "Start from matrices: tab-delimited per-site mutation-count matrix matching --bullseye_glm_coverage (same rows and sample columns).",
+                    "format": "file-path",
+                    "exists": true
+                },
+                "bullseye_glm_design": {
+                    "type": "string",
+                    "description": "R formula string used as design in Bullseye GLM helper.",
+                    "default": "~group"
+                },
+                "bullseye_glm_link": {
+                    "type": "string",
+                    "description": "Link/model option passed to Bullseye helper function.",
+                    "default": "betabin",
+                    "enum": ["betabin", "bin", "quasibinomial", "betareg"]
+                },
+                "bullseye_glm_min_cov": {
+                    "type": "integer",
+                    "description": "Minimum coverage threshold passed to Bullseye GLM helper.",
+                    "default": 10
+                },
+                "star_index": {
+                    "type": "string",
+                    "description": "Path to STAR index directory.",
+                    "format": "directory-path"
+                },
+                "star_ignore_sjdbgtf": {
+                    "type": "boolean",
+                    "description": "When using pre-built STAR index, do not pass the GTF file at the mapping step.",
+                    "default": false
+                },
+                "gtf": {
+                    "type": "string",
+                    "description": "Path to annotation GTF file.",
+                    "format": "file-path"
+                },
+                "hisat2_index": {
+                    "type": "string",
+                    "description": "Path to HISAT2 index directory.",
+                    "format": "directory-path"
+                },
+                "hisat2_splicesites": {
+                    "type": "string",
+                    "description": "Path to HISAT2 splice sites file.",
+                    "format": "file-path"
+                },
+                "hisat2_build_memory": {
+                    "type": "string",
+                    "description": "Minimum memory threshold for HISAT2 index build to include splice-site/exon hints.",
+                    "default": "8.GB"
+                },
                 "help": {
                     "type": ["boolean", "string"],
                     "description": "Display the help message."
@@ -228,6 +442,11 @@
                 "show_hidden": {
                     "type": "boolean",
                     "description": "Display hidden parameters in the help message (only works when --help or --help_full are provided)."
+                },
+                "test_root": {
+                    "type": "string",
+                    "description": "Root directory for test data and caches. Defaults to DARTSEQ_TEST_ROOT environment variable.",
+                    "hidden": true
                 }
             }
         }

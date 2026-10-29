@@ -3,30 +3,56 @@ nextflow_pipeline {
     name "Test pipeline"
     script "../main.nf"
     tag "pipeline"
+    // Also runnable directly: nextflow run . -profile docker,test
+    // nf-test 0.9.5: this suite-level profile is not reliably applied to
+    // nextflow_pipeline tests (see bacmodel/tests/macsyfinder.nf.test for a
+    // confirmed case on nf-test 0.9.3), so the params below are kept inline
+    // as the source of truth for the actual test run.
+    profile "test"
 
-    test("-profile test") {
+    test("Params: test profile") {
 
         when {
             params {
                 outdir = "$outputDir"
+                // input comes from conf/test.config (via the "test" profile) -
+                // can't reference params.pipelines_testdata_base_path here since
+                // this params{} block is evaluated by nf-test itself to build the
+                // overrides JSON, before Nextflow has resolved anything from
+                // nextflow.config, so it would silently be null.
+
+                trimmer = 'fastp'
+                aligner = 'star'
+                skip_alignment = true
+                skip_bullseye = true
+
+                genome = 'R64-1-1'
             }
         }
 
         then {
-            // stable_path: All files + folders in ${params.outdir}/ with a stable path (including file name)
-            def stable_path = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignore: ['pipeline_info/*.{html,json,txt}'])
-            // stable_content: All files in ${params.outdir}/ with stable content
-            def stable_content = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
-            assert workflow.success
+            // stable_name: All files + folders in ${params.outdir}/ with a stable name
+            def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignore: ['pipeline_info/*.{html,json,txt}', 'star/star/Log.out'])
+            // stable_path: All files in ${params.outdir}/ with stable content
+            def stable_path = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
+            // Every file produced, content-stable or not - .nftignore only excludes
+            // files from the content-hash snapshot (unstable content, e.g. embedded
+            // timestamps/tool versions), it doesn't mean they shouldn't be checked
+            // at all: catch truncated/empty writes that a hash exclusion would miss.
+            def emptyFileChecks = getAllFilesFromDir(params.outdir, relative: false, includeDir: false)
+                .collect { f -> { -> assert f.size() > 0 : "Empty output file: ${f}" } }
             assertAll(
-                { assert snapshot(
-                    // pipeline versions.yml file for multiqc from which Nextflow version is removed because we test pipelines on multiple Nextflow versions
-                    removeNextflowVersion("$outputDir/pipeline_info/nf_core_dartseq_software_mqc_versions.yml"),
-                    // All stable path name, with a relative path
-                    stable_path,
-                    // All files with stable contents
-                    stable_content
-                ).match() }
+                [
+                    { assert workflow.success},
+                    { assert snapshot(
+                        // pipeline versions.yml file for multiqc from which Nextflow version is removed because we test pipelines on multiple Nextflow versions
+                        removeNextflowVersion("$outputDir/pipeline_info/nf_core_dartseq_software_mqc_versions.yml"),
+                        // All stable path name, with a relative path
+                        stable_name,
+                        // All files with stable contents
+                        stable_path
+                    ).match() }
+                ] + emptyFileChecks as Closure[]
             )
         }
     }

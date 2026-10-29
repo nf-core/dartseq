@@ -1,0 +1,102 @@
+nextflow_pipeline {
+
+    name "STAR alignment test"
+    script "../main.nf"
+    tag "pipeline_star"
+    // Also runnable directly: nextflow run . -profile docker,test_star
+    profile "test_star"
+
+    test("STAR alignment") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+                // input comes from conf/test.config (via the "test" profile).
+                trimmer        = 'fastp'
+                aligner        = 'star'
+                skip_alignment = false
+                skip_bullseye  = true
+
+                star_index = null
+                fasta      = 'https://raw.githubusercontent.com/nf-core/test-datasets/dartseq/data/dartseq/reference/genome.fa'
+                gtf        = 'https://raw.githubusercontent.com/nf-core/test-datasets/dartseq/data/dartseq/reference/genes.gtf'
+                genome     = null
+            }
+        }
+
+        then {
+            // Check BAM files exist and are non-empty
+            def a03_bam = file("$outputDir/star/A03/A03.Aligned.sortedByCoord.out.bam")
+            def a04_bam = file("$outputDir/star/A04/A04.Aligned.sortedByCoord.out.bam")
+            def c03_bam = file("$outputDir/star/C03/C03.Aligned.sortedByCoord.out.bam")
+            def e01_bam = file("$outputDir/star/E01/E01.Aligned.sortedByCoord.out.bam")
+            def a03_bai = file("$outputDir/star/A03/A03.Aligned.sortedByCoord.out.bam.bai")
+            def a04_bai = file("$outputDir/star/A04/A04.Aligned.sortedByCoord.out.bam.bai")
+            def c03_bai = file("$outputDir/star/C03/C03.Aligned.sortedByCoord.out.bam.bai")
+            def e01_bai = file("$outputDir/star/E01/E01.Aligned.sortedByCoord.out.bam.bai")
+
+            // STAR's own alignment-rate summary - excluded from the content-hash
+            // snapshot (star/*/*.Log.* in .nftignore, timestamps embedded), but
+            // parseable metrics confirm alignment actually happened, not just that
+            // STAR ran and produced a BAM.
+            def starLogChecks = ['A03', 'A04', 'C03', 'E01'].collect { sample ->
+                { ->
+                    def lines = file("$outputDir/star/${sample}/${sample}.Log.final.out").readLines()
+                    def inputReads = lines.find { it.contains('Number of input reads') }?.tokenize('|')?.last()?.trim() as Integer
+                    def uniquelyMapped = lines.find { it.contains('Uniquely mapped reads number') }?.tokenize('|')?.last()?.trim() as Integer
+                    assert inputReads != null && inputReads > 0 : "${sample}: no input reads reported"
+                    assert uniquelyMapped != null && uniquelyMapped >= 0 : "${sample}: uniquely mapped reads not reported"
+                }
+            }
+
+            // genomeParameters.txt - excluded from the content-hash snapshot (its
+            // first line embeds the STAR binary's absolute path, which differs
+            // between the pinned container and a freshly-built -profile conda env
+            // and can never be aligned by a version pin). Everything past that
+            // first line is a stable key\tvalue parameter echo though, so check
+            // the actual fasta/gtf got wired through correctly instead.
+            def genomeParams = file("$outputDir/star/star/genomeParameters.txt").readLines()
+            def genomeParamChecks = [
+                { -> assert genomeParams.any { it.startsWith('genomeFastaFiles') && it.contains('genome.fa') } : "genomeFastaFiles not wired to genome.fa: ${genomeParams}" },
+                { -> assert genomeParams.any { it.startsWith('sjdbGTFfile') && it.contains('genes.gtf') } : "sjdbGTFfile not wired to genes.gtf: ${genomeParams}" }
+            ]
+
+            // stable_name: All files + folders in ${params.outdir}/ with a stable name
+            def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignore: ['pipeline_info/*.{html,json,txt}', 'star/star/Log.out'])
+            // stable_path: All files in ${params.outdir}/ with stable content
+            def stable_path = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
+            // Every file produced, content-stable or not - .nftignore only excludes
+            def emptyFileChecks = getAllFilesFromDir(params.outdir, relative: false, includeDir: false)
+                .collect { f -> { -> assert f.size() > 0 : "Empty output file: ${f}" } }
+            assertAll(
+                [
+                    { assert workflow.success },
+                    // Verify BAM files exist and have content
+                    { assert a03_bam.exists() },
+                    { assert a03_bam.size() > 0 },
+                    { assert a04_bam.exists() },
+                    { assert a04_bam.size() > 0 },
+                    { assert c03_bam.exists() },
+                    { assert c03_bam.size() > 0 },
+                    { assert e01_bam.exists() },
+                    { assert e01_bam.size() > 0 },
+                    // Verify BAI indices exist
+                    { assert a03_bai.exists() },
+                    { assert a04_bai.exists() },
+                    { assert c03_bai.exists() },
+                    { assert e01_bai.exists() },
+                    { assert snapshot(
+                        // Number of successful tasks
+                        workflow.trace.succeeded().size(),
+                        // pipeline versions.yml file for multiqc from which Nextflow version is removed because we test pipelines on multiple Nextflow versions
+                        removeNextflowVersion("$outputDir/pipeline_info/nf_core_dartseq_software_mqc_versions.yml"),
+                        // All stable path names, with a relative path
+                        stable_name,
+                        // All files with stable contents
+                        stable_path
+                    ).match() }
+                ] + starLogChecks + genomeParamChecks + emptyFileChecks as Closure[]
+            )
+        }
+    }
+}

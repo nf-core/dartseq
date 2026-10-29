@@ -6,7 +6,9 @@
 
 ## Introduction
 
-<!-- TODO nf-core: Add documentation about anything specific to running your pipeline. For general topics, please point to (and add to) the main nf-core website. -->
+This pipeline supports RNA editing focused processing with Bullseye steps.
+For Bullseye runs, ensure that the annotation file matches the reference used for alignment.
+For STAR-based alignment with pre-built indices, use `--star_ignore_sjdbgtf` when the index already encodes splice junction annotation.
 
 ## Samplesheet input
 
@@ -94,6 +96,129 @@ genome: 'GRCh37'
 ```
 
 You can also generate such `YAML`/`JSON` files via [nf-core/launch](https://nf-co.re/launch).
+
+## Bullseye Contrasts
+
+The Bullseye DART-seq analysis supports flexible comparison strategies through a contrasts file. This allows you to specify exact sample group comparisons and customize detection parameters per contrast.
+
+### When to use contrasts
+
+Use contrasts when you need:
+
+- **Explicit control** over which groups are compared (e.g., factorial designs)
+- **Differential mode** to compare two DART samples (both have editing)
+- **Per-contrast thresholds** for different biological contexts
+
+### Contrasts file format
+
+Create a CSV file with these columns:
+
+| Column           | Required | Description                                                    | Default      |
+| ---------------- | -------- | -------------------------------------------------------------- | ------------ |
+| `contrast_id`    | Yes      | Unique identifier for this comparison                          | -            |
+| `edited_group`   | Yes      | Sample group containing editing signal                         | -            |
+| `control_group`  | Yes      | Sample group used as control                                   | -            |
+| `mode`           | No       | `standard` (DART vs non-DART) or `differential` (DART vs DART) | `standard`   |
+| `min_edit`       | No       | Minimum editing percentage to call a site                      | 5 or 3\*     |
+| `max_edit`       | No       | Maximum editing percentage (filters noisy sites)               | 90 or 95\*   |
+| `fold_threshold` | No       | Fold-change threshold vs control                               | 1.5 or 1.2\* |
+| `min_sites`      | No       | Minimum number of edited sites required                        | 3            |
+
+\*Defaults depend on mode: stricter for `standard`, relaxed for `differential`.
+
+### Example: Simple comparison
+
+```csv
+contrast_id,edited_group,control_group
+baseline_m6A,dart,control
+```
+
+### Example: Factorial design
+
+```csv
+contrast_id,edited_group,control_group,mode,min_edit,fold_threshold
+m6A_noninfected,dart_ni,control_ni,standard,5,1.5
+m6A_infected,dart_inf,control_inf,standard,5,1.5
+infection_effect,dart_inf,dart_ni,differential,3,1.2
+```
+
+In this factorial design:
+
+- First two contrasts detect m6A in non-infected and infected conditions (DART vs non-DART)
+- Third contrast finds infection-induced m6A changes (DART vs DART with relaxed thresholds)
+
+### Usage
+
+Provide the contrasts file via the `--bullseye_contrasts` parameter:
+
+```bash
+nextflow run nf-core/dartseq \
+  --input samplesheet.csv \
+  --bullseye_contrasts contrasts.csv \
+  --skip_bullseye false \
+  ...
+```
+
+The `group` column in your samplesheet must match the group names used in the contrasts file.
+
+## Bullseye GLM
+
+After site gathering (`--skip_bullseye_gather_sites false`; skipped by default), the pipeline can fit a generalized linear model across the gathered coverage/mutation matrices to test for differential editing between groups. This step is controlled by `--skip_bullseye_glm` (also skipped by default) and requires `--skip_bullseye_gather_sites false` to have produced the coverage and mutation matrices it reads.
+
+### Observations file
+
+Provide sample metadata via `--bullseye_glm_observations`, a TSV/CSV file with one row per sample and at least:
+
+| Column   | Required | Description                                                                   |
+| -------- | -------- | ----------------------------------------------------------------------------- |
+| `sample` | Yes      | Must exactly match a sample column in the gathered coverage/mutation matrices |
+
+Add any further columns needed by your `--bullseye_glm_design` formula (e.g. a `group` column for `~group`). The sample names in the gathered matrices reflect whatever filtering ran immediately before gathering (e.g. `<sample>.bullseye.RAC` if RAC filtering was applied, `<sample>.bullseye.all_sites` if both RAC and AC filtering were skipped) - check the header of `bullseye/all_bullseye_sites/*.bullseye.coverage.txt` to get the exact names to use.
+
+```tsv
+sample	group
+sample1.bullseye.RAC	dart
+sample2.bullseye.RAC	dart
+sample3.bullseye.RAC	control
+sample4.bullseye.RAC	control
+```
+
+### Design and link parameters
+
+- `--bullseye_glm_design` (default `~group`): a one-sided R formula naming the column in the observations file to test. That column is converted to a factor internally, so it does not need to be pre-factored.
+- `--bullseye_glm_link` (default `betabin`): the GLM family - `betabin` (beta-binomial, recommended for most editing data), `bin` (binomial), `quasibinomial`, or `betareg`.
+- `--bullseye_glm_min_cov` (default `10`): sites with coverage below this threshold (per sample) are zeroed out before fitting.
+
+The design's grouping column needs at least two groups (the GLM stops with an error otherwise); too few samples per group can still yield `NA` p-values for individual sites. Groups are compared against the first group in alphabetical order, and results are reported as `<group>_pvalue` and `<group>_log2FoldChange` per site. Group labels must not occur inside other group or sample names (e.g. groups `k` and `kd`), because Bullseye assigns samples to groups by matching the label.
+
+### Usage
+
+```bash
+nextflow run nf-core/dartseq \
+  --input samplesheet.csv \
+  --skip_bullseye false \
+  --skip_bullseye_gather_sites false \
+  --skip_bullseye_glm false \
+  --bullseye_glm_observations observations.tsv \
+  --bullseye_glm_design '~group' \
+  --bullseye_glm_link betabin \
+  ...
+```
+
+### Starting from matrices
+
+If you already have per-site coverage and mutation-count matrices (e.g. from an earlier run, or with additional samples quantified at the same sites), you can run only the GLM. FASTQ processing, alignment and Bullseye site calling are skipped, and `--input` is not needed:
+
+```bash
+nextflow run nf-core/dartseq \
+  --bullseye_glm_coverage coverage.txt \
+  --bullseye_glm_mut mut.txt \
+  --bullseye_glm_observations observations.tsv \
+  --bullseye_glm_design '~group' \
+  --outdir <OUTDIR>
+```
+
+Both matrices use the `BULLSEYE_GATHER_SITES` format: tab-delimited, columns `#chr`, `start`, `end`, `cluster`, `strand`, then one column per sample, with identical rows and columns in both files. Every `sample` in the observations file must be a matrix column; extra matrix columns are ignored. Results are written to `bullseye/glm_matrix/glm_matrix.bullseye.glm.tsv`.
 
 ### Updating the pipeline
 
