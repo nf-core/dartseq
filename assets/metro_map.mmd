@@ -1,0 +1,95 @@
+%%metro title: nf-core/dartseq
+%%metro logo: docs/images/dartseq_logo.png
+%%metro style: light
+%%metro line_order: span
+%% a_fastq_in: nf-metro starts animations at the alphabetically first root station,
+%% so this ID must sort before bullseye_*/hisat2_*/star_* (balls start at the FASTQ input)
+%%metro file: a_fastq_in | FASTQ
+%%metro file: report_out | HTML
+%%metro file: glm_out | TSV
+%%metro line: star | Aligner: STAR | #2db572
+%%metro line: hisat2 | Aligner: HISAT2 | #ff9800
+%%metro line: bullseye_ext | Optional: RAC filter, gather sites, GLM | #9b59b6 | dashed
+%%metro legend: br
+
+graph LR
+    subgraph input_qc [Input & QC]
+        %%metro exit: right | star, hisat2
+        a_fastq_in[ ]
+        fastqc([FastQC])
+        fastp([fastp])
+        trimgalore([Trim Galore!])
+
+        a_fastq_in -->|star,hisat2| fastqc
+        a_fastq_in -->|star,hisat2| fastp
+        a_fastq_in -->|star,hisat2| trimgalore
+    end
+
+    subgraph alignment [Alignment]
+        %%metro entry: left | star, hisat2
+        %%metro exit: right | star, hisat2
+        star_genomegenerate([STAR Index])
+        star_align([STAR Align])
+        hisat2_extractsplicesites([HISAT2 Splice Sites])
+        hisat2_build([HISAT2 Index])
+        hisat2_align([HISAT2 Align])
+        samtools_sort([SAMtools Sort])
+        samtools_index([SAMtools Index])
+
+        star_genomegenerate -->|star| star_align
+        hisat2_extractsplicesites -->|hisat2| hisat2_build
+        hisat2_extractsplicesites -->|hisat2| hisat2_align
+        hisat2_build -->|hisat2| hisat2_align
+        star_align -->|star| samtools_index
+        hisat2_align -->|hisat2| samtools_sort
+        samtools_sort -->|hisat2| samtools_index
+    end
+
+    subgraph editing_detection [RNA Editing Detection]
+        %%metro entry: left | star, hisat2
+        %%metro exit: right | star, hisat2
+        bullseye_gtf2genepred([GTF to GenePred])
+        bullseye_parsebam([Parse BAM])
+        bullseye_find_edit_sites([Find Edit Sites])
+        bullseye_summarize_sites([Summarize Sites])
+        bullseye_quantify_sites([Quantify Sites])
+        bullseye_acfilter([AC Filter])
+
+        bullseye_gtf2genepred -->|star,hisat2| bullseye_find_edit_sites
+        bullseye_parsebam -->|star,hisat2| bullseye_find_edit_sites
+        bullseye_parsebam -->|star,hisat2| bullseye_quantify_sites
+        bullseye_find_edit_sites -->|star,hisat2| bullseye_summarize_sites
+        bullseye_summarize_sites -->|star,hisat2| bullseye_quantify_sites
+        bullseye_quantify_sites -->|star,hisat2| bullseye_acfilter
+    end
+
+    subgraph filtering_modeling [Site Filtering & Modeling]
+        %%metro entry: left | bullseye_ext
+        bullseye_racfilter([RAC Filter])
+        bullseye_gather_sites([Gather Sites])
+        bullseye_r_glm([Beta-Binomial GLM])
+        glm_out[ ]
+
+        bullseye_racfilter -->|bullseye_ext| bullseye_gather_sites
+        bullseye_gather_sites -->|bullseye_ext| bullseye_r_glm
+        bullseye_r_glm -->|bullseye_ext| glm_out
+    end
+
+    subgraph reporting [Reporting]
+        %%metro entry: left | star, hisat2
+        multiqc([MultiQC])
+        report_out[ ]
+
+        multiqc -->|star,hisat2| report_out
+    end
+
+    %% Inter-section edges
+    fastp -->|star| star_align
+    fastp -->|hisat2| hisat2_align
+    trimgalore -->|star| star_align
+    trimgalore -->|hisat2| hisat2_align
+    samtools_index -->|star,hisat2| bullseye_parsebam
+    bullseye_acfilter -->|bullseye_ext| bullseye_racfilter
+    fastqc -->|star,hisat2| multiqc
+    fastp -->|star,hisat2| multiqc
+    trimgalore -->|star,hisat2| multiqc

@@ -11,10 +11,8 @@
 include { UTILS_NFSCHEMA_PLUGIN     } from '../../nf-core/utils_nfschema_plugin'
 include { paramsSummaryMap          } from 'plugin/nf-schema'
 include { samplesheetToList         } from 'plugin/nf-schema'
-include { paramsHelp                } from 'plugin/nf-schema'
 include { completionEmail           } from '../../nf-core/utils_nfcore_pipeline'
 include { completionSummary         } from '../../nf-core/utils_nfcore_pipeline'
-include { imNotification            } from '../../nf-core/utils_nfcore_pipeline'
 include { UTILS_NFCORE_PIPELINE     } from '../../nf-core/utils_nfcore_pipeline'
 include { UTILS_NEXTFLOW_PIPELINE   } from '../../nf-core/utils_nextflow_pipeline'
 
@@ -54,6 +52,9 @@ workflow PIPELINE_INITIALISATION {
     //
     // Validate parameters and generate parameter summary to stdout
     //
+
+    def before_text = ""
+    def after_text = ""
     before_text = """
 -\033[2m----------------------------------------------------\033[0m-
                                         \033[0;32m,--.\033[0;30m/\033[0;32m,-.\033[0m
@@ -71,6 +72,10 @@ workflow PIPELINE_INITIALISATION {
 * Software dependencies
     https://github.com/nf-core/dartseq/blob/master/CITATIONS.md
 """
+    if (monochrome_logs) {
+        before_text = before_text.replaceAll(/\033\[[0-9;]*m/, '')
+    }
+
     command = "nextflow run ${workflow.manifest.name} -profile <docker/singularity/.../institute> --input samplesheet.csv --outdir <OUTDIR>"
 
     UTILS_NFSCHEMA_PLUGIN (
@@ -82,7 +87,8 @@ workflow PIPELINE_INITIALISATION {
         show_hidden,
         before_text,
         after_text,
-        command
+        command,
+        null
     )
 
     //
@@ -99,27 +105,36 @@ workflow PIPELINE_INITIALISATION {
 
     //
     // Create channel from input file provided through params.input
+    // (absent when starting from matrices via --bullseye_glm_coverage/--bullseye_glm_mut)
     //
-
-    channel
-        .fromList(samplesheetToList(params.input, "${projectDir}/assets/schema_input.json"))
-        .map {
-            meta, fastq_1, fastq_2 ->
-                if (!fastq_2) {
-                    return [ meta.id, meta + [ single_end:true ], [ fastq_1 ] ]
-                } else {
-                    return [ meta.id, meta + [ single_end:false ], [ fastq_1, fastq_2 ] ]
-                }
-        }
-        .groupTuple()
-        .map { samplesheet ->
-            validateInputSamplesheet(samplesheet)
-        }
-        .map {
-            meta, fastqs ->
-                return [ meta, fastqs.flatten() ]
-        }
-        .set { ch_samplesheet }
+    if (!input) {
+        ch_samplesheet = channel.empty()
+    } else {
+        channel
+            .fromList(samplesheetToList(input, "${projectDir}/assets/schema_input.json"))
+            .map {
+                row ->
+                    def meta = row[0]
+                    def fastq_1 = row.size() > 1 ? row[1] : null
+                    def fastq_2 = row.size() > 2 ? row[2] : null
+                    def group = row.size() > 3 ? row[3] : null
+                    def meta_with_group = group ? meta + [ group: group ] : meta
+                    if (!fastq_2) {
+                        return [ meta.id, meta_with_group + [ single_end:true ], [ fastq_1 ] ]
+                    } else {
+                        return [ meta.id, meta_with_group + [ single_end:false ], [ fastq_1, fastq_2 ] ]
+                    }
+            }
+            .groupTuple()
+            .map { samplesheet ->
+                validateInputSamplesheet(samplesheet)
+            }
+            .map {
+                meta, fastqs ->
+                    return [ meta, fastqs.flatten() ]
+            }
+            .set { ch_samplesheet }
+    }
 
     emit:
     samplesheet = ch_samplesheet
@@ -140,7 +155,6 @@ workflow PIPELINE_COMPLETION {
     plaintext_email // boolean: Send plain-text email instead of HTML
     outdir          //    path: Path to output directory where results will be published
     monochrome_logs // boolean: Disable ANSI colour codes in log output
-    hook_url        //  string: hook URL for notifications
     multiqc_report  //  string: Path to MultiQC report
 
     main:
@@ -159,18 +173,16 @@ workflow PIPELINE_COMPLETION {
                 plaintext_email,
                 outdir,
                 monochrome_logs,
-                multiqc_reports.getVal(),
+                multiqc_reports.isBound() ? multiqc_reports.getVal() : [],
             )
         }
 
         completionSummary(monochrome_logs)
-        if (hook_url) {
-            imNotification(summary_params, hook_url)
-        }
+
     }
 
     workflow.onError {
-        log.error "Pipeline failed. Please refer to troubleshooting docs: https://nf-co.re/docs/usage/troubleshooting"
+        log.error "Pipeline failed. Please refer to troubleshooting docs for common issues: https://nf-co.re/docs/running/troubleshooting"
     }
 }
 
@@ -184,6 +196,103 @@ workflow PIPELINE_COMPLETION {
 //
 def validateInputParameters() {
     genomeExistsError()
+    validatePipelineModeParameters()
+}
+
+//
+// True when the pipeline starts from coverage/mutation matrices instead of FASTQs
+//
+def isGlmMatrixMode() {
+    return params.bullseye_glm_coverage || params.bullseye_glm_mut
+}
+
+def validatePipelineModeParameters() {
+    if (isGlmMatrixMode()) {
+        if (!params.bullseye_glm_coverage || !params.bullseye_glm_mut) {
+            error("Starting from matrices requires both --bullseye_glm_coverage and --bullseye_glm_mut")
+        }
+        if (!params.bullseye_glm_observations) {
+            error("Starting from matrices requires --bullseye_glm_observations")
+        }
+        if (params.input) {
+            error("Use either --input (start from FASTQs) or --bullseye_glm_coverage/--bullseye_glm_mut (start from matrices), not both")
+        }
+        if (!params.bullseye_glm_mock && !params.bullseye_functions_r_file) {
+            error("Starting from matrices requires --bullseye_functions_r_file unless --bullseye_glm_mock is enabled")
+        }
+        // FASTQ, alignment and Bullseye site-calling checks below do not apply
+        return
+    }
+
+    if (!params.input) {
+        error("--input is required unless starting from matrices (--bullseye_glm_coverage, --bullseye_glm_mut, --bullseye_glm_observations)")
+    }
+
+    def allowed_trimmers = ['none', 'fastp', 'trimgalore']
+    if (!allowed_trimmers.contains(params.trimmer as String)) {
+        error("Invalid --trimmer '${params.trimmer}'. Allowed values: ${allowed_trimmers.join(', ')}")
+    }
+
+    def allowed_aligners = ['star', 'hisat2']
+    if (!allowed_aligners.contains(params.aligner as String)) {
+        error("Invalid --aligner '${params.aligner}'. Allowed values: ${allowed_aligners.join(', ')}")
+    }
+
+    if (!params.skip_alignment && params.aligner == 'star') {
+        if (!params.star_index && !params.fasta) {
+            error("STAR alignment selected but neither --star_index nor --fasta is set (or derivable from --genome)")
+        }
+        if (!params.gtf) {
+            error("STAR alignment selected but --gtf is not set (or not derivable from --genome)")
+        }
+    }
+
+    if (!params.skip_alignment && params.aligner == 'hisat2') {
+        if (!params.hisat2_index && !params.fasta) {
+            error("HISAT2 alignment selected but neither --hisat2_index nor --fasta is set")
+        }
+        if (!params.hisat2_splicesites && !params.gtf) {
+            error("HISAT2 alignment selected but neither --hisat2_splicesites nor --gtf is set")
+        }
+    }
+
+    if (!params.skip_bullseye && params.skip_alignment) {
+        error("--skip_bullseye false requires alignment outputs. Please disable --skip_alignment.")
+    }
+
+    if (!params.skip_bullseye && !params.bullseye_mock && !params.annotation_reFlat_file && !params.gtf) {
+        error("--skip_bullseye false requires either --annotation_reFlat_file or --gtf unless --bullseye_mock is enabled")
+    }
+
+    if (!params.skip_bullseye_racfilter && params.skip_bullseye) {
+        error("--skip_bullseye_racfilter false requires --skip_bullseye false")
+    }
+
+    // BULLSEYE_ACFILTER (mandatory A-before-edited-C check) always runs whenever Bullseye
+    // does, so --fasta is required unconditionally now - not just for the optional RAC filter.
+    if (!params.skip_bullseye && !params.bullseye_mock && !params.fasta) {
+        error("--skip_bullseye false requires --fasta unless --bullseye_mock is enabled")
+    }
+
+    if (!params.skip_bullseye_gather_sites && params.skip_bullseye) {
+        error("--skip_bullseye_gather_sites false requires --skip_bullseye false")
+    }
+
+    if (!params.skip_bullseye_gather_sites && !(params.bullseye_gather_score || params.bullseye_gather_coverage || params.bullseye_gather_mutations)) {
+        error("--skip_bullseye_gather_sites false requires at least one of --bullseye_gather_score, --bullseye_gather_coverage, or --bullseye_gather_mutations")
+    }
+
+    if (!params.skip_bullseye_glm && params.skip_bullseye_gather_sites) {
+        error("--skip_bullseye_glm false requires --skip_bullseye_gather_sites false")
+    }
+
+    if (!params.skip_bullseye_glm && !params.bullseye_glm_mock && !params.bullseye_functions_r_file) {
+        error("--skip_bullseye_glm false requires --bullseye_functions_r_file unless --bullseye_glm_mock is enabled")
+    }
+
+    if (!params.skip_bullseye_glm && !params.bullseye_glm_observations) {
+        error("--skip_bullseye_glm false requires --bullseye_glm_observations")
+    }
 }
 
 //
@@ -229,9 +338,9 @@ def genomeExistsError() {
 // Generate methods description for MultiQC
 //
 def toolCitationText() {
-    // TODO nf-core: Optionally add in-text citation tools to this list.
+    // Add in-text citations for tools used by this pipeline.
     // Can use ternary operators to dynamically construct based conditions, e.g. params["run_xyz"] ? "Tool (Foo et al. 2023)" : "",
-    // Uncomment function in methodsDescriptionText to render in MultiQC report
+    // Function is rendered in methodsDescriptionText for MultiQC.
     def citation_text = [
             "Tools used in the workflow included:",
             "FastQC (Andrews 2010),",
@@ -243,9 +352,9 @@ def toolCitationText() {
 }
 
 def toolBibliographyText() {
-    // TODO nf-core: Optionally add bibliographic entries to this list.
+    // Bibliographic entries for tools used by this pipeline.
     // Can use ternary operators to dynamically construct based conditions, e.g. params["run_xyz"] ? "<li>Author (2023) Pub name, Journal, DOI</li>" : "",
-    // Uncomment function in methodsDescriptionText to render in MultiQC report
+    // Function is rendered in methodsDescriptionText for MultiQC.
     def reference_text = [
             "<li>Andrews S, (2010) FastQC, URL: https://www.bioinformatics.babraham.ac.uk/projects/fastqc/).</li>",
             "<li>Ewels, P., Magnusson, M., Lundin, S., & Käller, M. (2016). MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics , 32(19), 3047–3048. doi: /10.1093/bioinformatics/btw354</li>"
@@ -278,9 +387,8 @@ def methodsDescriptionText(mqc_methods_yaml) {
     meta["tool_citations"] = ""
     meta["tool_bibliography"] = ""
 
-    // TODO nf-core: Only uncomment below if logic in toolCitationText/toolBibliographyText has been filled!
-    // meta["tool_citations"] = toolCitationText().replaceAll(", \\.", ".").replaceAll("\\. \\.", ".").replaceAll(", \\.", ".")
-    // meta["tool_bibliography"] = toolBibliographyText()
+    meta["tool_citations"] = toolCitationText().replaceAll(", \\.", ".").replaceAll("\\. \\.", ".").replaceAll(", \\.", ".")
+    meta["tool_bibliography"] = toolBibliographyText()
 
 
     def methods_text = mqc_methods_yaml.text
