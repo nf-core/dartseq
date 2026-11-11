@@ -10,7 +10,7 @@ lint:
   nfcore_components: false
   pipeline_todos: false
   readme: false
-nf_core_version: 4.2.1
+nf_core_version: 4.2.2
 repository_type: pipeline
 template:
   author: Mathieu Flamand, Olga Brovkina, Joana Pimenta Bernardes, Fatemeh Nasehi
